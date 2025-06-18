@@ -1,0 +1,37 @@
+DotMod - A dotfile manager from heaven
+
+These are common DotMod commands used in various situations:
+
+Manage your dotfiles:
+  commit          Apply/synchronize dotfiles based on current configuration
+  backup          Create a backup of the currently loaded dotfiles
+  restore         Apply/Synchronize to last backup (requires existing backup)
+
+  status          Show the current status of dotfiles and configuration
+  check           Perform a dry run to display what changes would be made
+
+  load            Load/add specific module(s)
+  uload           Unload/remove specific module(s)
+
+Configure basic settings:
+  set-path        Save the default dotfile repository path
+  set-profile     Save the default profile
+  set-theme       Save the default theme
+
+Print basic information:
+  path            Display the currently active dotfile repository path
+  profile         Display the currently active profile
+  theme           Display the currently active theme
+  version         Display DotMod's version
+
+  list-profiles   List all available profiles found in the current dotfile repository
+  list-modules    List all discoverable modules for the current dotfile path/profile
+  list-themes     List all available themes for the current dotfile path
+
+Other options:
+  -c, --config    Use a custom path for settings.toml
+  -f, --force     Forces command execution without prompting for confirmation
+  -v, --verbose   Enable verbose output for more detailed information and debugging
+  -q, --quiet     Suppress all non-error output
+  -h, --help      Display this help message
+  --version       Display DotMod's version
