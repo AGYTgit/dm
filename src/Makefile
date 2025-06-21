@@ -1,5 +1,7 @@
-SRCS := main.c util.c
-OBJS := $(patsubst %.c,%.o,$(SRCS))
+CC := gcc
+SRCS := main.c utils/logUtils.c
+# OBJS := $(SRCS:.c=.o)
+OBJS := main.o logUtils.o
 SRC_DIR := src
 LDFLAGS := -ltoml
 APP_NAME := dotmod
@@ -10,8 +12,8 @@ INSTALL_DIR := /usr/bin
 all: $(APP_NAME) install clean
 
 $(APP_NAME): $(SRCS)
-	gcc -c $(SRCS)
-	gcc $(OBJS) -o $(APP_NAME) $(LDFLAGS)
+	$(CC) -c $(SRCS)
+	$(CC) $(OBJS) -o $(APP_NAME) $(LDFLAGS)
 
 .PHONY: install
 install:
