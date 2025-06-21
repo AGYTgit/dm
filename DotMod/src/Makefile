@@ -1,7 +1,9 @@
 SRCS := main.c util.c
 OBJS := $(patsubst %.c,%.o,$(SRCS))
+SRC_DIR := src
 LDFLAGS := -ltoml
 APP_NAME := dotmod
+
 INSTALL_DIR := /usr/bin
 
 .PHONY: all

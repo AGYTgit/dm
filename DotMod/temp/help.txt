@@ -1,8 +1,10 @@
-DotMod - A dotfile manager from heaven
+DotMod (DM) - A dotfile manager from heaven
 
 These are common DotMod commands used in various situations:
 
 Manage your dotfiles:
+  init <name>     Generates default dotfiles dir
+
   commit          Apply/synchronize dotfiles based on current configuration
   backup          Create a backup of the currently loaded dotfiles
   restore         Apply/Synchronize to last backup (requires existing backup)
@@ -29,7 +31,7 @@ Print basic information:
   list-themes     List all available themes for the current dotfile path
 
 Other options:
-  -c, --config    Use a custom path for settings.toml
+  -c, --path    Use a custom path (for current command)
   -f, --force     Forces command execution without prompting for confirmation
   -v, --verbose   Enable verbose output for more detailed information and debugging
   -q, --quiet     Suppress all non-error output
