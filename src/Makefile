@@ -1,7 +1,7 @@
 CC := gcc
-SRCS := main.c utils/logUtils.c
+SRCS := main.c utils/log.c parse/flags.c parse/commands.c
 # OBJS := $(SRCS:.c=.o)
-OBJS := main.o logUtils.o
+OBJS := main.o log.o flags.o
 SRC_DIR := src
 LDFLAGS := -ltoml
 APP_NAME := dotmod

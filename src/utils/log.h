@@ -10,10 +10,15 @@ typedef enum {
 } logLevel;
 
 /**
- * @brief Sets the global logging threshold
+ * @brief Sets the global logging threshold (level)
  * Messages with a level lower than the set threshold will not be printed
  */
 void setLogLevel(logLevel level);
+
+/**
+ * @brief Returnds log level
+ */
+char* getLogLevel();
 
 /**
  * @brief Logs an error message

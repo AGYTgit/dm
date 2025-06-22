@@ -21,6 +21,6 @@ typedef struct {
 /**
  * @brief Parses flags
  */
-parsedFlags parseFlags(int argc, char* argv[], int optind=1);
+parsedFlags parseFlags(int argc, char* argv[], int* optindStart);
 
 #endif // PARSE_FLAGS_H

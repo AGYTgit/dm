@@ -14,18 +14,23 @@ static logLevel currentLogLevel = LOG_LEVEL_INFO; // Default to INFO
  * @param args The va_list of arguments
  */
 static void logMessage(logLevel level, const char* prefix, const char* format, va_list args) {
-    if (level <= currentLogLevel) {
-        char timeBuffer[32];
-        time_t timer;
-        struct tm* tmInfo;
+    if (currentLogLevel >= level) {
+        if (currentLogLevel == LOG_LEVEL_DEBUG) {
+            char timeBuffer[32];
+            time_t timer;
+            struct tm* tmInfo;
 
-        time(&timer);
-        tmInfo = localtime(&timer);
+            time(&timer);
+            tmInfo = localtime(&timer);
 
-        // Format timestamp as YYYY-MM-DD HH:MM:SS
-        strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", tmInfo);
+            // Format timestamp as YYYY-MM-DD HH:MM:SS
+            strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", tmInfo);
 
-        fprintf(stderr, "[%s] %s: ", timeBuffer, prefix);
+            fprintf(stderr, "[%s] %s: ", timeBuffer, prefix);
+        } else {
+            fprintf(stderr, "%s: ", prefix);
+        }
+
         vfprintf(stderr, format, args);
         fprintf(stderr, "\n");
     }
@@ -33,6 +38,26 @@ static void logMessage(logLevel level, const char* prefix, const char* format, v
 
 void setLogLevel(logLevel level) {
     currentLogLevel = level;
+}
+
+char* getLogLevel() {
+    switch (currentLogLevel) {
+    case LOG_LEVEL_MUTE:
+        return "MUTE";
+        break;
+    case LOG_LEVEL_ERROR:
+        return "ERROR";
+        break;
+    case LOG_LEVEL_WARNING:
+        return "WARNING";
+        break;
+    case LOG_LEVEL_INFO:
+        return "INFO";
+        break;
+    case LOG_LEVEL_DEBUG:
+        return "DEBUG";
+        break;
+    }
 }
 
 void logError(const char* format, ...) {

@@ -13,42 +13,49 @@ static struct option allFlags[] = {
     {0, 0, 0, 0}
 };
 
-parsedFlags parseFlags(int argc, char* argv[], int optind=1) {
+parsedFlags parseFlags(int argc, char* argv[], int* optindStart) {
     parsedFlags flags = {0};
 
+    if (*optindStart >= argc) {
+        return flags;
+    }
+
+    optind = *optindStart;
+
     int opt;
-    int allFlagsIndex = 0;
+    int flagsIndex = 0;
 
     const char* optStr = "c:fVqmhv";
 
-    while ((opt = getopt_long(argc, argv, optStr, allFlags, &longIndex)) != -1) {
+    while ((opt = getopt_long(argc, argv, optStr, allFlags, &flagsIndex)) != -1) {
         switch (opt) {
-            case 'c':
-                flags.customPath = optarg;
-                break;
-            case 'f':
-                flags.forceFlag = true;
-                break;
-            case 'V':
-                flags.verboseFlag = true;
-                break;
-            case 'q':
-                flags.quietFlag = true;
-                break;
-            case 'm':
-                flags.muteFlag = true;
-                break;
-            case 'h':
-                flags.helpFlag = true;
-                break;
-            case 'v':
-                flags.versionFlag = true;
-                break;
-            case '?':
-                flags.parsingError = true;
-                return flags;
+        case 'c':
+            flags.customPath = optarg;
+            break;
+        case 'f':
+            flags.forceFlag = true;
+            break;
+        case 'V':
+            flags.verboseFlag = true;
+            break;
+        case 'q':
+            flags.quietFlag = true;
+            break;
+        case 'm':
+            flags.muteFlag = true;
+            break;
+        case 'h':
+            flags.helpFlag = true;
+            break;
+        case 'v':
+            flags.versionFlag = true;
+            break;
+        case '?':
+            flags.parsingError = true;
+            return flags;
         }
     }
 
+    *optindStart = optind;
     return flags;
 }

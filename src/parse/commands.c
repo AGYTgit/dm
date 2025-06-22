@@ -1,113 +1,117 @@
-#include "flags.h"
-#include <getopt.h>
+#include "commands.h"
+#include <string.h>
+#include <stdlib.h>
 
-// Define long flags for getopt_long
-static struct option longflags[] = {
-    {"custom",  required_argument, 0, 'c'},
-    {"force",   no_argument,       0, 'f'},
-    {"verbose", no_argument,       0, 'V'},
-    {"quiet",   no_argument,       0, 'q'},
-    {"mute",    no_argument,       0, 'm'},
-    {"help",    no_argument,       0, 'h'},
-    {"version", no_argument,       0, 'v'},
-    {0, 0, 0, 0}
-};
+/**
+ * @brief Helper function to create and return a parsedCommand in an error state
+ */
+static parsedCommand createErrorCommand(errorType error) {
+    parsedCommand errorCommand = {
+        .cmd = CMD_NONE,
+        .action = ACTION_NONE,
+        .value = NULL,
+        .parsingError = true,
+        .errorType = error
+    };
+    return errorCommand;
+}
 
-parsedFlags parseFlags(int argc, char* argv[], int optind=1) {
-    parsedFlags flags = {0}; // Initialize all members to 0/false/NULL
+/**
+ * @brief Parses the main command, its optional action and optional value
+ * This function is called after global flags have been parsed by parseFlags
+ */
+parsedCommand parseCommand(int argc, char* argv[], int* optind) {
+    parsedCommand commands = {
+        .cmd = CMD_NONE,
+        .action = ACTION_NONE,
+        .value = NULL,
+        .parsingError = false,
+        .errorType = CMD_NONE
+    };
 
-    int opt;
-    int longIndex = 0;
-
-    const char* optStr = "c:fVqmhv";
-
-    // Reset optind for multiple calls if needed (though typically only called once)
-    optind = 1;
-
-    while ((opt = getopt_long(argc, argv, optStr, longflags, &longIndex)) != -1) {
-        switch (opt) {
-            case 'c':
-                flags.customPath = optarg;
-                break;
-            case 'f':
-                flags.forceFlag = true;
-                break;
-            case 'V':
-                flags.verboseFlag = true;
-                break;
-            case 'q':
-                flags.quietFlag = true;
-                break;
-            case 'm':
-                flags.muteFlag = true;
-                break;
-            case 'h':
-                flags.helpFlag = true;
-                break;
-            case 'v':
-                flags.versionFlag = true;
-                break;
-            case '?':
-                flags.parsingError = true;
-                return flags;
-        }
+    if ((*optind) >= argc) {
+        return commands;
     }
 
-    // Process non-option arguments (which should be our command and its argument)
-    if (optind < argc) {
-        char* commandStr = argv[optind];
-        // logDebug removed
+    char* cmdTypeStr = argv[(*optind)];
 
-        if (!strcmp(commandStr, "init")) {
-            flags.command = COMMAND_INIT;
-        } else if (!strcmp(commandStr, "commit")) {
-            flags.command = COMMAND_COMMIT;
-        } else if (!strcmp(commandStr, "backup")) {
-            flags.command = COMMAND_BACKUP;
-        } else if (!strcmp(commandStr, "restore")) {
-            flags.command = COMMAND_RESTORE;
-        } else if (!strcmp(commandStr, "status")) {
-            flags.command = COMMAND_STATUS;
-        } else if (!strcmp(commandStr, "check")) {
-            flags.command = COMMAND_CHECK;
-        } else if (!strcmp(commandStr, "load")) {
-            flags.command = COMMAND_LOAD;
-        } else if (!strcmp(commandStr, "uload")) {
-            flags.command = COMMAND_ULOAD;
-        } else if (!strcmp(commandStr, "set-path")) {
-            flags.command = COMMAND_SET_PATH;
-        } else if (!strcmp(commandStr, "set-profile")) {
-            flags.command = COMMAND_SET_PROFILE;
-        } else if (!strcmp(commandStr, "set-theme")) {
-            flags.command = COMMAND_SET_THEME;
-        } else if (!strcmp(commandStr, "get-path")) {
-            flags.command = COMMAND_GET_PATH;
-        } else if (!strcmp(commandStr, "get-profile")) {
-            flags.command = COMMAND_GET_PROFILE;
-        } else if (!strcmp(commandStr, "get-theme")) {
-            flags.command = COMMAND_GET_THEME;
-        } else if (!strcmp(commandStr, "get-version")) {
-            flags.command = COMMAND_GET_VERSION;
-        } else if (!strcmp(commandStr, "list-profiles")) {
-            flags.command = COMMAND_LIST_PROFILES;
-        } else if (!strcmp(commandStr, "list-modules")) {
-            flags.command = COMMAND_LIST_MODULES;
-        } else if (!strcmp(commandStr, "list-themes")) {
-            flags.command = COMMAND_LIST_THEMES;
+    // Identify command
+    if (!strcmp(cmdTypeStr, "init")) {
+        commands.cmd = CMD_INIT;
+        (*optind)++;
+        if ((*optind) < argc) {
+            commands.value = argv[(*optind)];
         } else {
-            // Unknown command
-            flags.parsingError = true; // Indicate a parsing error
-            // Removed fprintf(stderr, ...) and exit(EXIT_FAILURE)
-            // You might want to store the unknown command string here if main needs it for a specific error message
-            return flags; // Return immediately
+            commands.value = "";
         }
+    } else if (!strcmp(cmdTypeStr, "commit")) {
+        commands.cmd = CMD_COMMIT;
+    } else if (!strcmp(cmdTypeStr, "backup")) {
+        commands.cmd = CMD_BACKUP;
+    } else if (!strcmp(cmdTypeStr, "restore")) {
+        commands.cmd = CMD_RESTORE;
+    } else if (!strcmp(cmdTypeStr, "status")) {
+        commands.cmd = CMD_STATUS;
+    } else if (!strcmp(cmdTypeStr, "check")) {
+        commands.cmd = CMD_CHECK;
+    } else if (!strcmp(cmdTypeStr, "help")) {
+        commands.cmd = CMD_HELP;
+    } else if (!strcmp(cmdTypeStr, "load")) {
+        commands.cmd = CMD_LOAD;
+        (*optind)++;
+        if ((*optind) < argc) {
+            commands.value = argv[(*optind)];
+        } else {
+            return createErrorCommand(ERROR_MISSING_VALUE);
+        }
+    } else if (!strcmp(cmdTypeStr, "uload")) {
+        commands.cmd = CMD_ULOAD;
+        (*optind)++;
+        if ((*optind) < argc) {
+            commands.value = argv[(*optind)];
+        } else {
+            return createErrorCommand(ERROR_MISSING_VALUE);
+        }
+    }
+    // Commands that can take either of set/get/list subcommands
+    else if (!strcmp(cmdTypeStr, "version")) {
+        commands.cmd = CMD_VERSION;
+    } else if (!strcmp(cmdTypeStr, "path")) {
+        commands.cmd = CMD_PATH;
+    } else if (!strcmp(cmdTypeStr, "profile")) {
+        commands.cmd = CMD_PROFILE;
+    } else if (!strcmp(cmdTypeStr, "theme")) {
+        commands.cmd = CMD_THEME;
+    } else if (!strcmp(cmdTypeStr, "modules")) {
+        commands.cmd = CMD_MODULES;
+    } else if (!strcmp(cmdTypeStr, "profiles")) {
+        commands.cmd = CMD_PROFILES;
+    }
+    else {
+        return createErrorCommand(ERROR_UNKNOWN_CMD);
+    }
 
-        // If there's a subsequent argument, it's the command's argument
-        if (optind + 1 < argc) {
-            flags.argValue = argv[optind + 1];
-            // logDebug removed
+    if (commands.cmd == CMD_VERSION ||
+        commands.cmd == CMD_PATH ||
+        commands.cmd == CMD_PROFILE ||
+        commands.cmd == CMD_THEME) {
+        if ((*optind) == argc) {
+            commands.action = ACTION_GET;
+        } else if ((*optind) < argc) {
+            (*optind)++;
+
+            if (!strcmp(argv[*optind], "set")) {
+            }
+            if (!strcmp(argv[*optind], "get")) {
+            }
+            if (!strcmp(argv[*optind], "list")) {
+            }
         }
     }
 
-    return flags;
+    if ((*optind) < argc) {
+        return createErrorCommand(ERROR_UNEXPECTED_TRAILING_ARGS);
+    }
+
+    return commands;
 }
