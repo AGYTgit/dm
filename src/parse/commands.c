@@ -5,13 +5,12 @@
 /**
  * @brief Helper function to create and return a parsedCommand in an error state
  */
-static parsedCommand createErrorCommand(errorType error) {
+static parsedCommand createErrorCommand(errorType err) {
     parsedCommand errorCommand = {
         .cmd = CMD_NONE,
         .action = ACTION_NONE,
         .value = NULL,
-        .parsingError = true,
-        .errorType = error
+        .error = err
     };
     return errorCommand;
 }
@@ -21,97 +20,147 @@ static parsedCommand createErrorCommand(errorType error) {
  * This function is called after global flags have been parsed by parseFlags
  */
 parsedCommand parseCommand(int argc, char* argv[], int* optind) {
-    parsedCommand commands = {
+    parsedCommand command = {
         .cmd = CMD_NONE,
         .action = ACTION_NONE,
         .value = NULL,
-        .parsingError = false,
-        .errorType = CMD_NONE
+        .error = CMD_NONE
     };
 
     if ((*optind) >= argc) {
-        return commands;
+        return command;
     }
 
     char* cmdTypeStr = argv[(*optind)];
+    (*optind)++;
 
     // Identify command
     if (!strcmp(cmdTypeStr, "init")) {
-        commands.cmd = CMD_INIT;
-        (*optind)++;
+        command.cmd = CMD_INIT;
         if ((*optind) < argc) {
-            commands.value = argv[(*optind)];
+            command.value = argv[(*optind)];
+            (*optind)++;
         } else {
-            commands.value = "";
+            command.value = "default";
         }
     } else if (!strcmp(cmdTypeStr, "commit")) {
-        commands.cmd = CMD_COMMIT;
+        command.cmd = CMD_COMMIT;
     } else if (!strcmp(cmdTypeStr, "backup")) {
-        commands.cmd = CMD_BACKUP;
+        command.cmd = CMD_BACKUP;
     } else if (!strcmp(cmdTypeStr, "restore")) {
-        commands.cmd = CMD_RESTORE;
+        command.cmd = CMD_RESTORE;
     } else if (!strcmp(cmdTypeStr, "status")) {
-        commands.cmd = CMD_STATUS;
+        command.cmd = CMD_STATUS;
     } else if (!strcmp(cmdTypeStr, "check")) {
-        commands.cmd = CMD_CHECK;
+        command.cmd = CMD_CHECK;
     } else if (!strcmp(cmdTypeStr, "help")) {
-        commands.cmd = CMD_HELP;
+        command.cmd = CMD_HELP;
     } else if (!strcmp(cmdTypeStr, "load")) {
-        commands.cmd = CMD_LOAD;
-        (*optind)++;
+        command.cmd = CMD_LOAD;
         if ((*optind) < argc) {
-            commands.value = argv[(*optind)];
+            command.value = argv[(*optind)];
+            (*optind)++;
         } else {
             return createErrorCommand(ERROR_MISSING_VALUE);
         }
     } else if (!strcmp(cmdTypeStr, "uload")) {
-        commands.cmd = CMD_ULOAD;
-        (*optind)++;
+        command.cmd = CMD_ULOAD;
         if ((*optind) < argc) {
-            commands.value = argv[(*optind)];
+            command.value = argv[(*optind)];
+            (*optind)++;
         } else {
             return createErrorCommand(ERROR_MISSING_VALUE);
         }
     }
-    // Commands that can take either of set/get/list subcommands
+    // commands that can take either of set/get/list subcommands
+    // NOTE: rewrite this to use a recursive function for parsing
     else if (!strcmp(cmdTypeStr, "version")) {
-        commands.cmd = CMD_VERSION;
+        command.cmd = CMD_VERSION;
+        if ((*optind) < argc) {
+            if (!strcmp(argv[*optind], "set")) { return createErrorCommand(ERROR_INVALID_ACTION); }
+            else if (!strcmp(argv[*optind], "get")) { command.action = ACTION_GET; }
+            else if (!strcmp(argv[*optind], "list")) { return createErrorCommand(ERROR_INVALID_ACTION); }
+            else { return createErrorCommand(ERROR_INVALID_ACTION); }
+            (*optind)++;
+        } else {
+            command.action = ACTION_GET;
+        }
     } else if (!strcmp(cmdTypeStr, "path")) {
-        commands.cmd = CMD_PATH;
+        command.cmd = CMD_PATH;
+        if ((*optind) < argc) {
+            if (!strcmp(argv[*optind], "set")) {
+                command.action = ACTION_SET;
+                if ((*optind) + 1 < argc) {
+                    command.value = argv[(*optind) + 1];
+                    (*optind)++;
+                } else {
+                    return createErrorCommand(ERROR_MISSING_VALUE);
+                }
+            }
+            else if (!strcmp(argv[*optind], "get")) { command.action = ACTION_GET; }
+            else if (!strcmp(argv[*optind], "list")) { return createErrorCommand(ERROR_INVALID_ACTION); }
+            else { return createErrorCommand(ERROR_INVALID_ACTION); }
+            (*optind)++;
+        } else {
+            command.action = ACTION_GET;
+        }
     } else if (!strcmp(cmdTypeStr, "profile")) {
-        commands.cmd = CMD_PROFILE;
+        command.cmd = CMD_PROFILE;
+        if ((*optind) < argc) {
+            if (!strcmp(argv[*optind], "set")) {
+                command.action = ACTION_SET;
+                if ((*optind) + 1 < argc) {
+                    command.value = argv[(*optind) + 1];
+                    (*optind)++;
+                } else {
+                    return createErrorCommand(ERROR_MISSING_VALUE);
+                }
+            }
+            else if (!strcmp(argv[*optind], "get")) { command.action = ACTION_GET; }
+            else if (!strcmp(argv[*optind], "list")) { command.action = ACTION_LIST; } 
+            else { return createErrorCommand(ERROR_INVALID_ACTION); }
+            (*optind)++;
+        } else {
+            command.action = ACTION_GET;
+        }
     } else if (!strcmp(cmdTypeStr, "theme")) {
-        commands.cmd = CMD_THEME;
-    } else if (!strcmp(cmdTypeStr, "modules")) {
-        commands.cmd = CMD_MODULES;
-    } else if (!strcmp(cmdTypeStr, "profiles")) {
-        commands.cmd = CMD_PROFILES;
+        command.cmd = CMD_THEME;
+        if ((*optind) < argc) {
+            if (!strcmp(argv[*optind], "set")) {
+                command.action = ACTION_SET;
+                if ((*optind) + 1 < argc) {
+                    command.value = argv[(*optind) + 1];
+                    (*optind)++;
+                } else {
+                    return createErrorCommand(ERROR_MISSING_VALUE);
+                }
+            }
+            else if (!strcmp(argv[*optind], "get")) { command.action = ACTION_GET; }
+            else if (!strcmp(argv[*optind], "list")) { command.action = ACTION_LIST; } 
+            else { return createErrorCommand(ERROR_INVALID_ACTION); }
+            (*optind)++;
+        } else {
+            command.action = ACTION_GET;
+        }
+    } else if (!strcmp(cmdTypeStr, "module")) {
+        command.cmd = CMD_MODULE;
+        if ((*optind) < argc) {
+            if (!strcmp(argv[*optind], "set")) { return createErrorCommand(ERROR_INVALID_ACTION); }
+            else if (!strcmp(argv[*optind], "get")) { return createErrorCommand(ERROR_INVALID_ACTION); }
+            else if (!strcmp(argv[*optind], "list")) { command.action = ACTION_LIST; } 
+            else { return createErrorCommand(ERROR_INVALID_ACTION); }
+            (*optind)++;
+        } else {
+            command.action = ACTION_LIST;
+        }
     }
     else {
         return createErrorCommand(ERROR_UNKNOWN_CMD);
-    }
-
-    if (commands.cmd == CMD_VERSION ||
-        commands.cmd == CMD_PATH ||
-        commands.cmd == CMD_PROFILE ||
-        commands.cmd == CMD_THEME) {
-        if ((*optind) == argc) {
-            commands.action = ACTION_GET;
-        } else if ((*optind) < argc) {
-            (*optind)++;
-
-            if (!strcmp(argv[*optind], "set")) {
-            }
-            if (!strcmp(argv[*optind], "get")) {
-            }
-            if (!strcmp(argv[*optind], "list")) {
-            }
-        }
     }
 
     if ((*optind) < argc) {
         return createErrorCommand(ERROR_UNEXPECTED_TRAILING_ARGS);
     }
 
-    return commands;
+    return command;
 }

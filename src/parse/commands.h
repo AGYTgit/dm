@@ -42,8 +42,7 @@ typedef struct {
     cmdType cmd;
     actionType action;
     char* value;
-    bool parsingError;
-    errorType errorType;
+    errorType error;
 } parsedCommand;
 
 /**

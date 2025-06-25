@@ -1,10 +1,10 @@
 CC := gcc
 SRCS := main.c utils/log.c parse/flags.c parse/commands.c
 # OBJS := $(SRCS:.c=.o)
-OBJS := main.o log.o flags.o
+OBJS := main.o log.o flags.o commands.o
 SRC_DIR := src
 LDFLAGS := -ltoml
-APP_NAME := dotmod
+APP_NAME := dm
 
 INSTALL_DIR := /usr/bin
 

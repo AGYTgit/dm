@@ -1,0 +1,2 @@
+feature: git like functionality
+    dm always keeps track of what is changed from last commit
