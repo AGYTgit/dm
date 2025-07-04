@@ -1,7 +1,7 @@
 all: compile run clean
 
 compile:
-	gcc main.c -o out -lyaml
+	gcc main.c parseModule.c -o out -lyaml
 
 run:
 	./out

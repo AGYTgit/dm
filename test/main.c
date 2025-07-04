@@ -1,129 +1,73 @@
-#include <yaml.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum {
-    STATE_NONE,
-    STATE_IN_MODULE_MAPPING,
-    STATE_EXPECTING_SYMLINKS_SEQUENCE,
-    STATE_IN_SYMLINKS_SEQUENCE
-} ParserState;
+#include "parseModule.h"
 
-void print_indentation(int depth) {
-    for (int i = 0; i < depth; ++i) {
-        printf("    ");
-    }
-}
+int main(void) {
+    moduleConf modConf;
+    const char* moduleFilePath = "module.yaml";
 
-int main() {
-    FILE *fh = NULL;
-    yaml_parser_t parser;
-    yaml_event_t event;
-    int done = 0;
-    int depth = 0;
-    int is_key = 0;
+    printf("Attempting to parse '%s'...\n", moduleFilePath);
 
-    ParserState current_state = STATE_NONE;
-    int symlinks_count = 0;
-
-    fh = fopen("module.yaml", "rb");
-    if (!fh) {
-        fprintf(stderr, "Failed to open 'module.yaml'. Please ensure the file exists.\n");
+    if (parseModuleConf(moduleFilePath, &modConf) != 0) {
+        fprintf(stderr, "Error: Failed to parse module configuration.\n");
         return EXIT_FAILURE;
     }
 
-    if (!yaml_parser_initialize(&parser)) {
-        fprintf(stderr, "Failed to initialize parser!\n");
-        fclose(fh);
-        return EXIT_FAILURE;
+    // modConf.level = 1;
+    // modConf.version = strdup("1.0");
+    // modConf.deps.moduleCount = 0;
+    // modConf.deps.pacmanCount = 1;
+    // modConf.deps.yayCount = 0;
+    // modConf.deps.pacman[0] = strdup("wofi");
+    // modConf.moduleCount = 0;
+    // modConf.linkCount = 1;
+    // modConf.links = (link*)malloc(1 * sizeof(link));
+    // modConf.links[0].source = strdup("wofi");
+    // modConf.links[0].target = strdup("$HOME/.config/wofi");
+
+    printf("\n--- Successfully Parsed Module Configuration ---\n");
+    printf("Level: %d\n", modConf.level);
+    printf("Version: %s\n", modConf.version ? modConf.version : "N/A");
+
+    printf("\nDependencies:\n");
+    printf("  Module (%zu): ", modConf.deps.moduleCount);
+    for (size_t i = 0; i < modConf.deps.moduleCount; i++) {
+        printf("%s%s", modConf.deps.module[i], (i == modConf.deps.moduleCount - 1) ? "" : ", ");
     }
+    printf("\n");
 
-    yaml_parser_set_input_file(&parser, fh);
-
-    while (!done) {
-        if (!yaml_parser_parse(&parser, &event)) {
-            fprintf(stderr, "Parser error: %s\n", parser.problem);
-            yaml_parser_delete(&parser);
-            fclose(fh);
-            return EXIT_FAILURE;
-        }
-
-        switch (event.type) {
-            case YAML_STREAM_START_EVENT:
-                printf("--- YAML Stream Start ---\n");
-                break;
-            case YAML_STREAM_END_EVENT:
-                printf("--- YAML Stream End ---\n");
-                done = 1;
-                break;
-            case YAML_DOCUMENT_START_EVENT:
-                printf("--- Document Start ---\n");
-                depth = 0;
-                current_state = STATE_IN_MODULE_MAPPING;
-                break;
-            case YAML_DOCUMENT_END_EVENT:
-                printf("--- Document End ---\n");
-                break;
-            case YAML_MAPPING_START_EVENT:
-                print_indentation(depth);
-                printf("{\n");
-                depth++;
-                is_key = 1;
-
-                if (current_state == STATE_IN_SYMLINKS_SEQUENCE) {
-                    symlinks_count++;
-                }
-                break;
-            case YAML_MAPPING_END_EVENT:
-                depth--;
-                print_indentation(depth);
-                printf("}\n");
-                break;
-            case YAML_SEQUENCE_START_EVENT:
-                print_indentation(depth);
-                printf("[\n");
-                depth++;
-                is_key = 0;
-
-                if (current_state == STATE_EXPECTING_SYMLINKS_SEQUENCE) {
-                    current_state = STATE_IN_SYMLINKS_SEQUENCE;
-                    symlinks_count = 0;
-                }
-                break;
-            case YAML_SEQUENCE_END_EVENT:
-                depth--;
-                print_indentation(depth);
-                printf("]\n");
-
-                if (current_state == STATE_IN_SYMLINKS_SEQUENCE) {
-                    printf("  Total symlink pairs found: %d\n", symlinks_count);
-                    current_state = STATE_IN_MODULE_MAPPING;
-                }
-                break;
-            case YAML_SCALAR_EVENT:
-                print_indentation(depth);
-                if (is_key) {
-                    printf("%s\n", (char *)event.data.scalar.value);
-                    is_key = 0;
-
-                    if (strcmp((char *)event.data.scalar.value, "symlinks") == 0) {
-                        current_state = STATE_EXPECTING_SYMLINKS_SEQUENCE;
-                    }
-                } else {
-                    printf("%s\n", (char *)event.data.scalar.value);
-                    is_key = 1;
-                }
-                break;
-            default:
-                break;
-        }
-
-        yaml_event_delete(&event);
+    printf("  Pacman (%zu): ", modConf.deps.pacmanCount);
+    for (size_t i = 0; i < modConf.deps.pacmanCount; i++) {
+        printf("%s%s", modConf.deps.pacman[i], (i == modConf.deps.pacmanCount - 1) ? "" : ", ");
     }
+    printf("\n");
 
-    yaml_parser_delete(&parser);
-    fclose(fh);
+    printf("  Yay (%zu): ", modConf.deps.yayCount);
+    for (size_t i = 0; i < modConf.deps.yayCount; i++) {
+        printf("%s%s", modConf.deps.yay[i], (i == modConf.deps.yayCount - 1) ? "" : ", ");
+    }
+    printf("\n");
 
-    return EXIT_SUCCESS;
+    printf("\nLinks (%zu):\n", modConf.linkCount);
+    for (size_t i = 0; i < modConf.linkCount; i++) {
+        printf("  [%zu] Source: %s, Target: %s\n", i,
+                modConf.links[i].source ? modConf.links[i].source : "N/A",
+                modConf.links[i].target ? modConf.links[i].target : "N/A");
+    }
+    printf("\n");
+
+    // These fields are not yet parsed/populated by the current logic in parseModule.c
+    printf("Nested Modules (Count: %zu, Not yet parsed):\n", modConf.moduleCount);
+    // Add loop here if you implement parsing for nested modules later
+    // for (size_t i = 0; i < modConf.moduleCount; i++) {
+    //     printf("  Module %zu Level: %d\n", i, modConf.modules[i].level);
+    // }
+    printf("\n");
+
+
+    freeModuleConf(&modConf);
+
+    return 0;
 }
