@@ -5,7 +5,8 @@ These are common dm commands used in various situations:
 Manage dotfiles:
   init <path>     Generates default dotfiles dir
 
-  commit          Apply/synchronize dotfiles based on current configuration
+  commit          Commit changes (overwrites last backup)
+  apply           Apply/synchronize dotfiles based on current configuration
   backup          Create a backup of the currently loaded dotfiles
   restore         Apply/Synchronize to last backup (requires existing backup)
 
@@ -35,6 +36,7 @@ Display information:
     theme   List all available themes for the current dotfile path
 
 Other options:
+  -g, --git       Automatically add and commit changes to personal git repo (specific for commit)
   -c, --custom    Use a custom path
   -f, --force     Forces command execution without prompting for confirmation
   -V, --verbose   Enable verbose output for more detailed information and debugging
