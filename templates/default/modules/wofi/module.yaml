@@ -1,0 +1,13 @@
+module:
+  level: 1
+  version: 1.0
+  deps:
+    module: []
+    pacman: ['wofi']
+    yay: []
+  sym:
+    source: 'wofi'
+    target: '$HOME/.config/wofi'
+    pairs:
+      - - 'wofi'
+        - '$HOME/.config/wofi'

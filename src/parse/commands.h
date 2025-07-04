@@ -5,7 +5,7 @@
 
 typedef enum {
     CMD_NONE,
-    // Standalone Commands
+    // Standalone commands
     CMD_INIT,
     CMD_COMMIT,
     CMD_BACKUP,
@@ -15,40 +15,52 @@ typedef enum {
     CMD_HELP,
     CMD_LOAD,
     CMD_ULOAD,
-    // Commands that *can* take either <set>, <get> or <list>
+    // Commands that can be combined with action commands
     CMD_VERSION,
     CMD_PATH,
     CMD_PROFILE,
     CMD_THEME,
     CMD_MODULE,
+    // Helper: Represents the number of defined commands
+    CMD_COUNT
 } cmdType;
 
 typedef enum {
-    ACTION_NONE,
-    ACTION_SET,
-    ACTION_GET,
-    ACTION_LIST
+    ACTION_NONE  = 0,
+    ACTION_SET   = 1 << 0,
+    ACTION_GET   = 1 << 1,
+    ACTION_LIST  = 1 << 2
 } actionType;
 
 typedef enum {
     ERROR_NONE,
-    ERROR_UNKNOWN_CMD, // For unidentifiable commands
-    ERROR_MISSING_VALUE,  // Missing value for command that requires it
+    ERROR_UNKNOWN_CMD,
+    ERROR_MISSING_VALUE,
     ERROR_UNEXPECTED_TRAILING_ARGS,
     ERROR_INVALID_ACTION
 } errorType;
 
 typedef struct {
-    cmdType cmd;
+    cmdType    cmd;
     actionType action;
-    char* value;
-    errorType error;
+    char*      value;
+    errorType  error;
 } parsedCommand;
 
 /**
- * @brief Parses the main command and its optional action/arguments
- * This function is called after global flags have been parsed by parseFlags
+ * @brief Parses the main command and optional action/arguments
+ * after global flags (if any) have already been parsed
  */
 parsedCommand parseCommand(int argc, char* argv[], int* optind);
+
+/**
+ * @brief Retrieves the bitmask of allowed actions
+ */
+int getAllowedActions(cmdType cmd);
+
+/**
+ * @brief Checks if a specific action is allowed for a given command
+ */
+bool isActionAllowed(cmdType cmd, actionType action);
 
 #endif // PARSE_COMMANDS_H

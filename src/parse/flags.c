@@ -30,25 +30,25 @@ parsedFlags parseFlags(int argc, char* argv[], int* optindStart) {
     while ((opt = getopt_long(argc, argv, optStr, allFlags, &flagsIndex)) != -1) {
         switch (opt) {
         case 'c':
-            flags.customPath = optarg;
+            flags.custom = optarg;
             break;
         case 'f':
-            flags.forceFlag = true;
+            flags.force = true;
             break;
         case 'V':
-            flags.verboseFlag = true;
+            flags.verbose = true;
             break;
         case 'q':
-            flags.quietFlag = true;
+            flags.quiet = true;
             break;
         case 'm':
-            flags.muteFlag = true;
+            flags.mute = true;
             break;
         case 'h':
-            flags.helpFlag = true;
+            flags.help = true;
             break;
         case 'v':
-            flags.versionFlag = true;
+            flags.version = true;
             break;
         case '?':
             flags.parsingError = true;

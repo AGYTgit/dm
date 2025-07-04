@@ -40,7 +40,7 @@ void setLogLevel(logLevel level) {
     currentLogLevel = level;
 }
 
-char* getLogLevel() {
+char* getLogLevelStr() {
     switch (currentLogLevel) {
     case LOG_LEVEL_MUTE:
         return "MUTE";

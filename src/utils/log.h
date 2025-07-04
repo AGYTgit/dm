@@ -18,7 +18,7 @@ void setLogLevel(logLevel level);
 /**
  * @brief Returnds log level
  */
-char* getLogLevel();
+char* getLogLevelStr();
 
 /**
  * @brief Logs an error message

@@ -7,41 +7,36 @@
 #include "parse/flags.h"
 #include "parse/commands.h"
 
-int main(int argc, char* argv[]) {
+int parseFC(int argc, char* argv[]) {
     int optind = 1;
-    parsedFlags flags = parseFlags(argc, argv, &optind);
+    parsedFlags flag = parseFlags(argc, argv, &optind);
 
-    if (flags.parsingError) {
+    if (flag.parsingError) {
         logWarning("NYI: flag parsing error");
         return EXIT_FAILURE;
     }
 
-    if (flags.muteFlag) {
+    if (flag.mute) {
         setLogLevel(LOG_LEVEL_MUTE);
-    } else if (flags.verboseFlag) {
+    } else if (flag.verbose) {
         setLogLevel(LOG_LEVEL_DEBUG);
-    } else if (flags.quietFlag) {
+    } else if (flag.quiet) {
         setLogLevel(LOG_LEVEL_ERROR);
     } else {
         setLogLevel(LOG_LEVEL_INFO);
     }
-    logDebug("Set logLevel to %s", getLogLevel());
+    logDebug("Set logLevel to %s", getLogLevelStr());
 
-    logDebug("parsing flags");
-    logDebug("optind: %d", 1);
-
-    if (flags.helpFlag) {
+    if (flag.help) {
         logWarning("NYI: flag help");
         return EXIT_SUCCESS;
     }
 
-    if (flags.versionFlag) {
+    if (flag.version) {
         logWarning("NYI: flag version");
         return EXIT_SUCCESS;
     }
 
-    logDebug("parsing command");
-    logDebug("optind: %d", optind);
     parsedCommand command = parseCommand(argc, argv, &optind);
 
     if (command.error != ERROR_NONE) {
@@ -74,6 +69,14 @@ int main(int argc, char* argv[]) {
         if      (command.action == ACTION_LIST) { logInfo("command: theme list"); }
     } else if (command.cmd == CMD_MODULE) {
         if      (command.action == ACTION_LIST) { logInfo("command: module list"); }
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int main(int argc, char* argv[]) {
+    if (parseFC(argc, argv) != EXIT_SUCCESS) {
+        return EXIT_FAILURE;
     }
 
     logInfo("Hello from DotMod!");

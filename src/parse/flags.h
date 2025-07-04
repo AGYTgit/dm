@@ -8,19 +8,19 @@
  */
 typedef struct {
     char* customPath; // Path for --custom
-    bool customFlag;
-    bool muteFlag;
-    bool quietFlag;
-    bool verboseFlag;
-    bool forceFlag;
-    bool helpFlag;
-    bool versionFlag;
+    bool custom;
+    bool mute;
+    bool quiet;
+    bool verbose;
+    bool force;
+    bool help;
+    bool version;
     bool parsingError;
 } parsedFlags;
 
 /**
  * @brief Parses flags
  */
-parsedFlags parseFlags(int argc, char* argv[], int* optindStart);
+parsedFlags parseFlags(int argc, char* argv[], int* optind);
 
 #endif // PARSE_FLAGS_H
