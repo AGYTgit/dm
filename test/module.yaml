@@ -1,9 +1,11 @@
 module:
-    level: 1
+    name: wofi
     version: '1.0'
+    conf:
+        level: 1
     deps:
         module: []
-        pacman: ['wofi']
+        pacman: ['wofi', 'zsh']
         yay: []
     links:
         - {source: 'wofi', target: '$HOME/.config/wofi'}
