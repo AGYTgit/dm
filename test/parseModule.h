@@ -4,10 +4,11 @@
 typedef struct module module;
 
 typedef enum {
-    MODULE_ERROR_NONE,
-    MODULE_ERROR_CONFIG_FILE_NOT_FOUND,
-    MODULE_ERROR_YAML_PARSER_INIT_FAILED,
-    MODULE_ERROR_YAML_PARSER_FAILED
+    moduleErrorNone,
+    moduleErrorConfigFileNotFound,
+    moduleErrorYamlParserInitFailed,
+    moduleErrorYamlParserFailed,
+    moduleErrorMemoryAllocationFailed
 } moduleErrorType;
 
 typedef struct {
@@ -51,7 +52,7 @@ typedef struct module {
     moduleError error;
 } module;
 
-module parseModule(const char* fp);
+module parseModule(const char* filePath);
 
 void freeModule(module* mod);
 

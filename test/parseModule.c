@@ -5,185 +5,265 @@
 
 #include "parseModule.h"
 
-typedef enum {
-    CTX_NONE,
-    CTX_MOD,
-    CTX_MOD_DEPS,
-    CTX_MOD_DEPS_MODULE,
-    CTX_MOD_DEPS_PACMAN,
-    CTX_MOD_DEPS_YAY,
-    CTX_MOD_LINKS,
-    CTX_MOD_LINK_ITEM,
-} ctxType;
+static void setModuleError(module* mod, moduleErrorType type, const char* value) {
+    mod->error.type = type;
 
-static ctxType ctx;
-static char* key;
+    free(mod->error.value);
+    if (value) {
+        mod->error.value = strdup(value);
+    } else {
+        mod->error.value = NULL;
+    }
+}
 
-module parseModule(const char* filepath) {
-    ctx = CTX_NONE;
-    if (key) { free(key); key = NULL; }
+static int addToList(depsList* list, const char* value) {
+    list->count++;
+    char** newValues = realloc(list->value, list->count * sizeof(char*));
+    if (!newValues) {
+        list->count--;
+        return 0;
+    }
+    list->value = newValues;
+    list->value[list->count - 1] = strdup(value);
+    if (!list->value[list->count - 1]) {
+        list->count--;
+        return 0;
+    }
+    return 1;
+}
 
-    module mod;
-    memset(&mod, 0, sizeof(module));
-    mod.path = strdup(filepath);
+static int addLink(moduleLinks* links, const char* source, const char* target) {
+    links->count++;
+    char** newSources = realloc(links->source, links->count * sizeof(char*));
+    char** newTargets = realloc(links->target, links->count * sizeof(char*));
 
-    FILE* fh = fopen(mod.path, "rb");
+    if (!newSources || !newTargets) {
+        links->count--;
+        free(newSources);
+        free(newTargets);
+        return 0;
+    }
+    links->source = newSources;
+    links->target = newTargets;
+
+    links->source[links->count - 1] = strdup(source);
+    links->target[links->count - 1] = strdup(target);
+
+    if (!links->source[links->count - 1] || !links->target[links->count - 1]) {
+        links->count--;
+        if (links->source[links->count - 1]) free(links->source[links->count - 1]);
+        if (links->target[links->count - 1]) free(links->target[links->count - 1]);
+        return 0;
+    }
+    return 1;
+}
+
+module parseModule(const char* filePath) {
+    module mod = {0};
+    FILE* file = NULL;
     yaml_parser_t parser;
     yaml_event_t event;
-    int done = 0;
 
-    if (!fh) {
-        mod.error.type = MODULE_ERROR_CONFIG_FILE_NOT_FOUND;
+    mod.error.type = moduleErrorNone;
+    mod.error.value = NULL;
+
+    free(mod.path);
+    mod.path = strdup(filePath);
+
+    file = fopen(filePath, "rb");
+    if (!file) {
+        setModuleError(&mod, moduleErrorConfigFileNotFound, filePath);
         return mod;
     }
 
     if (!yaml_parser_initialize(&parser)) {
-        fclose(fh);
-        mod.error.type = MODULE_ERROR_YAML_PARSER_INIT_FAILED;
+        setModuleError(&mod, moduleErrorYamlParserInitFailed, NULL);
+        fclose(file);
         return mod;
     }
-    yaml_parser_set_input_file(&parser, fh);
+
+    yaml_parser_set_input_file(&parser, file);
+
+    int done = 0;
+    char* currentKey = NULL;
+    char* currentLinkSource = NULL;
+    enum {
+        stateNone,
+        stateInModule,
+        stateInConf,
+        stateInDeps,
+        stateInModuleDeps,
+        stateInPacmanDeps,
+        stateInYayDeps,
+        stateInLinks,
+        stateInLinkEntry
+    } state = stateNone;
 
     while (!done) {
         if (!yaml_parser_parse(&parser, &event)) {
-            yaml_parser_delete(&parser);
-            fclose(fh);
-            mod.error.type = MODULE_ERROR_YAML_PARSER_FAILED;
-            mod.error.value = strdup((char*)parser.problem);
-            return mod;
+            setModuleError(&mod, moduleErrorYamlParserFailed, parser.problem ? parser.problem : "Unknown YAML parsing error");
+            done = 1;
+            break;
         }
 
         switch (event.type) {
             case YAML_STREAM_START_EVENT:
-                printf("stream start\n");
+            case YAML_DOCUMENT_START_EVENT:
                 break;
             case YAML_STREAM_END_EVENT:
-                printf("stream end\n");
-                break;
-            case YAML_DOCUMENT_START_EVENT:
-                printf("document start\n");
-                break;
             case YAML_DOCUMENT_END_EVENT:
-                printf("document end\n");
+                done = 1;
                 break;
             case YAML_MAPPING_START_EVENT:
-                printf("mapping start\n");
-
-                if (!key) { // temporary solution
-                    break;
+                if (state == stateNone) {
+                    state = stateInModule;
+                } else if (state == stateInModule && currentKey) {
+                    if (strcmp(currentKey, "conf") == 0) {
+                        state = stateInConf;
+                    } else if (strcmp(currentKey, "deps") == 0) {
+                        state = stateInDeps;
+                    }
+                    free(currentKey);
+                    currentKey = NULL;
+                } else if (state == stateInLinks) {
+                    state = stateInLinkEntry;
                 }
-
-                switch (ctx) {
-                    case CTX_NONE:
-                        if (strcmp(key, "module") == 0) {
-                            ctx = CTX_MOD;
-                        }
-                        free(key); key = NULL;
-                        break;
-                    case CTX_MOD:
-                        if (strcmp(key, "deps") == 0) {
-                            ctx = CTX_MOD_DEPS;
-                        }
-                        free(key); key = NULL;
-                        break;
-                    case CTX_MOD_DEPS:
-                        if (strcmp(key, "module") == 0) {
-                            ctx = CTX_MOD_DEPS_MODULE;
-                        } else if (strcmp(key, "pacman") == 0) {
-                            ctx = CTX_MOD_DEPS_PACMAN;
-                        } else if (strcmp(key, "yay") == 0) {
-                            ctx = CTX_MOD_DEPS_YAY;
-                        }
-                        free(key); key = NULL;
-                        break;
-
                 break;
             case YAML_MAPPING_END_EVENT:
-                printf("mapping end\n");
-
-                switch (ctx) {
-                    case CTX_MOD:
-                        ctx = CTX_NONE;
-                        break;
-
-                    case CTX_MOD_DEPS:
-                        ctx = CTX_MOD;
-                        break;
-                    case CTX_MOD_DEPS_MODULE:
-                        ctx = CTX_MOD_DEPS;
-                        break;
-                    case CTX_MOD_DEPS_PACMAN:
-                        ctx = CTX_MOD_DEPS;
-                        break;
-                    case CTX_MOD_DEPS_YAY:
-                        ctx = CTX_MOD_DEPS;
-                        break;
-
-                    case CTX_MOD_LINKS:
-                        ctx = CTX_MOD;
-                        break;
+                if (state == stateInConf || state == stateInDeps || state == stateInLinks) {
+                    state = stateInModule;
+                } else if (state == stateInModuleDeps || state == stateInPacmanDeps || state == stateInYayDeps) {
+                    state = stateInDeps;
+                } else if (state == stateInLinkEntry) {
+                    state = stateInLinks;
+                    free(currentLinkSource);
+                    currentLinkSource = NULL;
                 }
-
                 break;
             case YAML_SEQUENCE_START_EVENT:
-                printf("sequence start\n");
-
-                if (!key) { // temporary solution
-                    break;
+                if (state == stateInModule && currentKey) {
+                    if (strcmp(currentKey, "links") == 0) {
+                        state = stateInLinks;
+                    }
+                    free(currentKey);
+                    currentKey = NULL;
+                } else if (state == stateInDeps && currentKey) {
+                    if (strcmp(currentKey, "module") == 0) {
+                        state = stateInModuleDeps;
+                    } else if (strcmp(currentKey, "pacman") == 0) {
+                        state = stateInPacmanDeps;
+                    } else if (strcmp(currentKey, "yay") == 0) {
+                        state = stateInYayDeps;
+                    }
+                    free(currentKey);
+                    currentKey = NULL;
                 }
-
-                switch (ctx) {
-                    case CTX_MOD:
-                        if (strcmp(key, "links") == 0) {
-                            ctx = CTX_MOD_LINKS;
-                        }
-
-                        break;
-
                 break;
             case YAML_SEQUENCE_END_EVENT:
-                printf("sequence end\n");
-
-                switch (ctx) {
-                    case CTX_MOD_LINK_ITEM:
-                        ctx = CTX_MOD_LINKS;
-                        free(key); key = NULL;
-                        break;
-
+                if (state == stateInModuleDeps || state == stateInPacmanDeps || state == stateInYayDeps) {
+                    state = stateInDeps;
+                }
                 break;
             case YAML_SCALAR_EVENT:
-                char* sc = (char*)event.data.scalar.value;
-                printf("scalar: %s\n", sc);
-
-                if (key == NULL) {
-                    key = strdup(sc); // might need security check after
-                } else {
-                    if (ctx == CTX_MOD && key) {
-                        if (strcmp(key, "name") == 0) {
-                            mod.name = strdup(sc);
-                        } else if (strcmp(key, "version") == 0) {
-                            mod.version = strdup(sc);
-                        } else if (strcmp(key, "level") == 0) {
-                            mod.conf.level = atoi(sc);
+                if (currentKey) {
+                    if (state == stateInModule) {
+                        if (strcmp(currentKey, "name") == 0) {
+                            free(mod.name);
+                            mod.name = strdup((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "version") == 0) {
+                            free(mod.version);
+                            mod.version = strdup((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "path") == 0) {
+                            free(mod.path);
+                            mod.path = strdup((char*)event.data.scalar.value);
+                        }
+                    } else if (state == stateInConf && strcmp(currentKey, "level") == 0) {
+                        mod.conf.level = atoi((char*)event.data.scalar.value);
+                    } else if (state == stateInLinkEntry) {
+                        if (strcmp(currentKey, "source") == 0) {
+                            free(currentLinkSource);
+                            currentLinkSource = strdup((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "target") == 0 && currentLinkSource) {
+                            if (!addLink(&mod.links, currentLinkSource, (char*)event.data.scalar.value)) {
+                                setModuleError(&mod, moduleErrorMemoryAllocationFailed, "Memory allocation failed for links");
+                                done = 1;
+                            }
+                            free(currentLinkSource);
+                            currentLinkSource = NULL;
                         }
                     }
-
-                    free(key);
-                    key = NULL;
+                    free(currentKey);
+                    currentKey = NULL;
+                } else {
+                    if (state == stateInModule || state == stateInConf || state == stateInDeps || state == stateInLinkEntry) {
+                        currentKey = strdup((char*)event.data.scalar.value);
+                    } else if (state == stateInModuleDeps) {
+                        if (!addToList(&mod.deps.module, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, moduleErrorMemoryAllocationFailed, "Memory allocation failed for module dependencies");
+                            done = 1;
+                        }
+                    } else if (state == stateInPacmanDeps) {
+                        if (!addToList(&mod.deps.pacman, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, moduleErrorMemoryAllocationFailed, "Memory allocation failed for pacman dependencies");
+                            done = 1;
+                        }
+                    } else if (state == stateInYayDeps) {
+                        if (!addToList(&mod.deps.yay, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, moduleErrorMemoryAllocationFailed, "Memory allocation failed for yay dependencies");
+                            done = 1;
+                        }
+                    }
                 }
-
                 break;
         }
         yaml_event_delete(&event);
+        if (mod.error.type != moduleErrorNone) {
+            done = 1;
+        }
     }
 
-    free(key);
-    yaml_parser_delete(&parser);
-    fclose(fh);
+    free(currentKey);
+    free(currentLinkSource);
 
+    yaml_parser_delete(&parser);
+    fclose(file);
     return mod;
 }
 
 void freeModule(module* mod) {
-    return;
+    if (!mod) {
+        return;
+    }
+
+    free(mod->name);
+    free(mod->version);
+    free(mod->path);
+    free(mod->error.value);
+
+    for (size_t i = 0; i < mod->deps.module.count; ++i) {
+        free(mod->deps.module.value[i]);
+    }
+    free(mod->deps.module.value);
+
+    for (size_t i = 0; i < mod->deps.pacman.count; ++i) {
+        free(mod->deps.pacman.value[i]);
+    }
+    free(mod->deps.pacman.value);
+
+    for (size_t i = 0; i < mod->deps.yay.count; ++i) {
+        free(mod->deps.yay.value[i]);
+    }
+    free(mod->deps.yay.value);
+
+    for (size_t i = 0; i < mod->links.count; ++i) {
+        free(mod->links.source[i]);
+        free(mod->links.target[i]);
+    }
+    free(mod->links.source);
+    free(mod->links.target);
+
+    for (size_t i = 0; i < mod->subModCount; ++i) {
+        freeModule(&mod->subMods[i]);
+    }
+    free(mod->subMods);
 }
