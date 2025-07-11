@@ -1,9 +1,9 @@
 CC := gcc
-SRCS := main.c utils/log.c parse/flags.c parse/commands.c
+SRCS := main.c utils/log.c parse/flags.c parse/commands.c parse/module.c
 # OBJS := $(SRCS:.c=.o)
-OBJS := main.o log.o flags.o commands.o
+OBJS := main.o log.o flags.o commands.o module.o
 SRC_DIR := src
-LDFLAGS := -ltoml
+LDFLAGS := -lyaml
 APP_NAME := dm
 
 INSTALL_DIR := /usr/bin

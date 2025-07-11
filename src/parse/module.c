@@ -3,7 +3,7 @@
 #include <string.h>
 #include <yaml.h>
 
-#include "parseModule.h"
+#include "module.h"
 
 static void setModuleError(module* mod, moduleErrorType type, const char* value) {
     mod->error.type = type;

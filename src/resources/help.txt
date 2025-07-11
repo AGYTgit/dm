@@ -1,4 +1,4 @@
-DotMod (dm) - A dotfile manager from heaven
+dm - A dotfile manager from heaven
 
 These are common dm commands used in various situations:
 

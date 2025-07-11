@@ -6,6 +6,45 @@
 #include "utils/log.h"
 #include "parse/flags.h"
 #include "parse/commands.h"
+#include "parse/module.h"
+
+int loadModule(char* filepath) {
+    module mod = parseModule(filepath);
+
+    if (mod.error.type) {
+        printf("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
+        return 1;
+    }
+
+    printf("\n");
+
+    printf("name: %s\n", mod.name);
+    printf("version: %s\n", mod.version);
+    printf("path: \'%s\'\n", mod.path);
+
+    printf("level: %d\n", mod.conf.level);
+
+    printf("%s", (mod.deps.module.count + mod.deps.pacman.count + mod.deps.yay.count) > 0 ? "deps:\n" : "");
+    printf("%s", mod.deps.module.count > 0 ? "    module:\n" : "");
+    for (size_t i = 0; i < mod.deps.module.count; ++i) {
+        printf("        [%d]: %s\n", i, mod.deps.module.value[i]);
+    }
+    printf("%s", mod.deps.pacman.count > 0 ? "    pacman:\n" : "");
+    for (size_t i = 0; i < mod.deps.pacman.count; ++i) {
+        printf("        [%d]: %s\n", i, mod.deps.pacman.value[i]);
+    }
+    printf("%s", mod.deps.yay.count > 0 ? "    yay:\n" : "");
+    for (size_t i = 0; i < mod.deps.yay.count; ++i) {
+        printf("        [%d]: %s\n", i, mod.deps.yay.value[i]);
+    }
+
+    printf("%s", mod.links.count > 0 ? "links:\n" : "");
+    for (size_t i = 0; i < mod.links.count; ++i) {
+        printf("    source: %s -> target: %s\n", mod.links.source[i], mod.links.target[i]);
+    }
+
+    printf("\n");
+}
 
 int parseFC(int argc, char* argv[]) {
     int optind = 1;
@@ -51,7 +90,11 @@ int parseFC(int argc, char* argv[]) {
     else if (command.cmd == CMD_STATUS)  { logInfo("command: status"); }
     else if (command.cmd == CMD_CHECK)   { logInfo("command: check"); }
     else if (command.cmd == CMD_HELP)    { logInfo("command: help"); }
-    else if (command.cmd == CMD_LOAD)    { logInfo("command: load %s", command.value); }
+    else if (command.cmd == CMD_LOAD)    { logInfo("command: load %s", command.value);
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "%s%s%s", "../templates/default/modules/", command.value, "/module.yaml");
+        loadModule(buffer);
+    }
     else if (command.cmd == CMD_ULOAD)   { logInfo("command: uload %s", command.value); }
 
     else if   (command.cmd == CMD_VERSION) {
