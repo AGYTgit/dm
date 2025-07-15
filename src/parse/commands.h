@@ -8,6 +8,7 @@ typedef enum {
     // Standalone commands
     CMD_INIT,
     CMD_COMMIT,
+    CMD_APPLY,
     CMD_BACKUP,
     CMD_RESTORE,
     CMD_STATUS,
@@ -52,15 +53,5 @@ typedef struct {
  * after global flags (if any) have already been parsed
  */
 parsedCommand parseCommand(int argc, char* argv[], int* optind);
-
-/**
- * @brief Retrieves the bitmask of allowed actions
- */
-int getAllowedActions(cmdType cmd);
-
-/**
- * @brief Checks if a specific action is allowed for a given command
- */
-bool isActionAllowed(cmdType cmd, actionType action);
 
 #endif // PARSE_COMMANDS_H

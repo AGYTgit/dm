@@ -1,0 +1,16 @@
+# dm - Core Application Configuration
+
+config:
+  app:
+    name: "dm"
+    version: "0.0.1"
+    description: "A dotfile manager from heaven"
+
+  paths:
+    repo: "$HOME/.dotfiles"
+    backup: "$HOME/.dotfiles/backups"
+    logDir: "$HOME/.local/share/dm/logs"
+
+  behavior:
+    autoGit: false
+    promptForConfirmation: true

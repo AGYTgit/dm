@@ -1,16 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <toml.h>
 
 #include "utils/log.h"
 #include "parse/flags.h"
 #include "parse/commands.h"
 #include "parse/module.h"
 
-int loadModule(char* filepath) {
-    module mod = parseModule(filepath);
 
+int printHelpPage() {
+    char* helpPath = "resources/help.txt";
+    FILE* fh = fopen(helpPath, "r");
+    if (!fh) {
+        logError("Could not open help file at \'%s\'", helpPath);
+        return 1;
+    }
+
+    int c;
+    while ((c = fgetc(fh)) != EOF) {
+        putchar(c);
+    }
+    fclose(fh);
+    return 0;
+}
+
+int printModuleConf(module mod) {
     if (mod.error.type) {
         printf("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
         return 1;
@@ -44,85 +58,157 @@ int loadModule(char* filepath) {
     }
 
     printf("\n");
+
+    return 0;
 }
 
-int parseFC(int argc, char* argv[]) {
-    int optind = 1;
-    parsedFlags flag = parseFlags(argc, argv, &optind);
+int getFlags(int argc, char* argv[], parsedFlags* flags, int* optindPtr) {
+    *flags = parseFlags(argc, argv, optindPtr);
 
-    if (flag.parsingError) {
-        logWarning("NYI: flag parsing error");
-        return EXIT_FAILURE;
+    if (flags->parsingError) {
+        logError("flag parsing failed");
+        return 1;
     }
 
-    if (flag.mute) {
+    return 0;
+}
+
+
+int getCommand(int argc, char* argv[], parsedCommand* command, int* optindPtr) {
+    *command = parseCommand(argc, argv, optindPtr);
+
+    if (command->error != ERROR_NONE) {
+        logError("[%d] while parsing commands", command->error);
+        return 1;
+    }
+
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
+    int optind = 1;
+    parsedFlags flags;
+    if (getFlags(argc, argv, &flags, &optind) != 0) {
+        return 1;
+    }
+
+    if (flags.mute) {
         setLogLevel(LOG_LEVEL_MUTE);
-    } else if (flag.verbose) {
+    } else if (flags.verbose) {
         setLogLevel(LOG_LEVEL_DEBUG);
-    } else if (flag.quiet) {
+    } else if (flags.quiet) {
         setLogLevel(LOG_LEVEL_ERROR);
     } else {
         setLogLevel(LOG_LEVEL_INFO);
     }
     logDebug("Set logLevel to %s", getLogLevelStr());
 
-    if (flag.help) {
-        logWarning("NYI: flag help");
-        return EXIT_SUCCESS;
+    if (flags.help) {
+        logDebug("flag: help");
+        return printHelpPage();
     }
 
-    if (flag.version) {
+    if (flags.version) {
         logWarning("NYI: flag version");
-        return EXIT_SUCCESS;
+        // print version
+        return 0;
     }
 
-    parsedCommand command = parseCommand(argc, argv, &optind);
-
-    if (command.error != ERROR_NONE) {
-        logWarning("NYI: command parsing error %d", command.error);
-        return EXIT_FAILURE;
+    parsedCommand command;
+    if (getCommand(argc, argv, &command, &optind) != 0) {
+        return 0;
     }
 
-    if      (command.cmd == CMD_INIT)    { logInfo("command: init %s", command.value); }
-    else if (command.cmd == CMD_COMMIT)  { logInfo("command: commit"); }
-    else if (command.cmd == CMD_BACKUP)  { logInfo("command: backup"); }
-    else if (command.cmd == CMD_RESTORE) { logInfo("command: restore"); }
-    else if (command.cmd == CMD_STATUS)  { logInfo("command: status"); }
-    else if (command.cmd == CMD_CHECK)   { logInfo("command: check"); }
-    else if (command.cmd == CMD_HELP)    { logInfo("command: help"); }
-    else if (command.cmd == CMD_LOAD)    { logInfo("command: load %s", command.value);
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "%s%s%s", "../templates/default/modules/", command.value, "/module.yaml");
-        loadModule(buffer);
+    switch (command.cmd) {
+        case CMD_INIT:
+            logWarning("NYI: command: init %s", command.value);
+            break;
+        case CMD_COMMIT:
+            logWarning("NYI: command: commit");
+            break;
+        case CMD_APPLY:
+            logWarning("NYI: command: apply");
+            break;
+        case CMD_BACKUP:
+            logWarning("NYI: command: backup");
+            break;
+        case CMD_RESTORE:
+            logWarning("NYI: command: restore");
+            break;
+        case CMD_STATUS:
+            logWarning("NYI: command: status");
+            break;
+        case CMD_CHECK:
+            logWarning("NYI: command: check");
+            break;
+        case CMD_HELP:
+            logDebug("command: help");
+            return printHelpPage();
+        case CMD_LOAD:
+            logWarning("NYI: command: load %s", command.value);
+
+            // temporary just to test module parsing
+            char buffer[128];
+            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", command.value);
+            module mod = parseModule(buffer);
+            printModuleConf(mod);
+            freeModule(&mod);
+
+            break;
+        case CMD_ULOAD:
+            logWarning("NYI: command: uload %s", command.value);
+            break;
+        case CMD_VERSION:
+            switch (command.action) {
+                case ACTION_GET:
+                    logWarning("NYI: command: version get");
+                    break;
+            }
+            break;
+        case CMD_PATH:
+            switch (command.action) {
+                case ACTION_SET:
+                    logWarning("NYI: command: path set %s", command.value);
+                    break;
+                case ACTION_GET:
+                    logWarning("NYI: command: path get");
+                    break;
+            }
+            break;
+        case CMD_PROFILE:
+            switch (command.action) {
+                case ACTION_SET:
+                    logWarning("NYI: command: profile set %s", command.value);
+                    break;
+                case ACTION_GET:
+                    logWarning("NYI: command: profile get");
+                    break;
+                case ACTION_LIST:
+                    logWarning("NYI: command: profile list");
+                    break;
+            }
+            break;
+        case CMD_THEME:
+            switch (command.action) {
+                case ACTION_SET:
+                    logWarning("NYI: command: theme set %s", command.value);
+                    break;
+                case ACTION_GET:
+                    logWarning("NYI: command: theme get");
+                    break;
+                case ACTION_LIST:
+                    logWarning("NYI: command: theme list");
+                    break;
+            }
+            break;
+        case CMD_MODULE:
+            switch (command.action) {
+                case ACTION_LIST:
+                    logWarning("NYI: command: module list");
+                    break;
+            }
+            break;
     }
-    else if (command.cmd == CMD_ULOAD)   { logInfo("command: uload %s", command.value); }
-
-    else if   (command.cmd == CMD_VERSION) {
-        if      (command.action == ACTION_GET)  { logInfo("command: version get"); }
-    } else if (command.cmd == CMD_PATH) {
-        if      (command.action == ACTION_SET)  { logInfo("command: path set %s", command.value); }
-        if      (command.action == ACTION_GET)  { logInfo("command: path get"); }
-    } else if (command.cmd == CMD_PROFILE) {
-        if      (command.action == ACTION_SET)  { logInfo("command: profile set %s", command.value); }
-        if      (command.action == ACTION_GET)  { logInfo("command: profile get"); }
-        if      (command.action == ACTION_LIST) { logInfo("command: profile list"); }
-    } else if (command.cmd == CMD_THEME) {
-        if      (command.action == ACTION_SET)  { logInfo("command: theme set %s", command.value); }
-        if      (command.action == ACTION_GET)  { logInfo("command: theme get"); }
-        if      (command.action == ACTION_LIST) { logInfo("command: theme list"); }
-    } else if (command.cmd == CMD_MODULE) {
-        if      (command.action == ACTION_LIST) { logInfo("command: module list"); }
-    }
-
-    return EXIT_SUCCESS;
-}
-
-int main(int argc, char* argv[]) {
-    if (parseFC(argc, argv) != EXIT_SUCCESS) {
-        return EXIT_FAILURE;
-    }
-
-    logInfo("Hello from DotMod!");
 
     return 0;
 }

@@ -1,0 +1,15 @@
+# dm - Commited Session State
+# DO NOT MODIFY MANUALLY!!!
+
+state:
+  profile: "default-pc"
+  theme: "default"
+
+  modules:
+    all:
+      - "hypr"
+      - "nvim"
+      - "wofi"
+
+    loaded:
+      - "wofi"

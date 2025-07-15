@@ -3,7 +3,7 @@ dm - A dotfile manager from heaven
 These are common dm commands used in various situations:
 
 Manage dotfiles:
-  init <path>     Generates default dotfiles dir
+  init [path]     Generates default dotfiles dir
 
   commit          Commit changes (overwrites last backup)
   apply           Apply/synchronize dotfiles based on current configuration
@@ -37,6 +37,8 @@ Display information:
 
 Other options:
   -g, --git       Automatically add and commit changes to personal git repo (specific for commit)
+  -a, --apply     Automatically call apply after state change (e.i. dm load [module] -a)
+  -r, --recursive Search for module name recursively in the provided path
   -c, --custom    Use a custom path
   -f, --force     Forces command execution without prompting for confirmation
   -V, --verbose   Enable verbose output for more detailed information and debugging

@@ -45,6 +45,8 @@ parsedCommand parseCommand(int argc, char* argv[], int* optind) {
         }
     } else if (!strcmp(cmdTypeStr, "commit")) {
         command.cmd = CMD_COMMIT;
+    } else if (!strcmp(cmdTypeStr, "apply")) {
+        command.cmd = CMD_APPLY;
     } else if (!strcmp(cmdTypeStr, "backup")) {
         command.cmd = CMD_BACKUP;
     } else if (!strcmp(cmdTypeStr, "restore")) {

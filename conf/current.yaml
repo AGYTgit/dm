@@ -1,0 +1,14 @@
+# dm - Current Session State
+
+state:
+  profile: "default-pc"
+  theme: "default"
+
+  modules:
+    all:
+      - "hypr"
+      - "nvim"
+      - "wofi"
+
+    loaded:
+      - "wofi"
