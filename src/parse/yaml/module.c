@@ -65,9 +65,7 @@ module parseModule(const char* filePath) {
     yaml_event_t event;
 
     mod.error.type = moduleErrorNone;
-    mod.error.value = NULL;
 
-    free(mod.path);
     mod.path = strdup(filePath);
 
     file = fopen(filePath, "rb");

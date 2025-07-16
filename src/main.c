@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "utils/log.h"
+
 #include "parse/flags.h"
 #include "parse/commands.h"
-#include "parse/module.h"
+
+#include "parse/yaml/module.h"
+#include "parse/yaml/config.h"
 
 
 int printHelpPage() {
@@ -21,6 +25,28 @@ int printHelpPage() {
         putchar(c);
     }
     fclose(fh);
+    return 0;
+}
+
+int printAppConf(config conf) {
+    if (conf.error.type) {
+        printf("ERROR [%d]: %s\n", conf.error.type, conf.error.value ? conf.error.value : "");
+        return 1;
+    }
+
+    printf("\n");
+
+    printf("name:        %s\n", conf.app.name);
+    printf("version:     %s\n", conf.app.version);
+    printf("description: %s\n", conf.app.description);
+    printf("repo:   %s\n", conf.paths.repo);
+    printf("backup: %s\n", conf.paths.backup);
+    printf("log:    %s\n", conf.paths.log);
+    printf("autoGit:               %s\n", conf.behavior.autoGit ? "true" : "false");
+    printf("promptForConfirmation: %s\n", conf.behavior.promptForConfirmation ? "true" : "false");
+
+    printf("\n");
+
     return 0;
 }
 
@@ -137,6 +163,12 @@ int main(int argc, char* argv[]) {
             break;
         case CMD_STATUS:
             logWarning("NYI: command: status");
+
+            // temporary just to test config parsing
+            config conf = parseConfig("../conf/config.yaml");
+            printAppConf(conf);
+            freeConfig(&conf);
+
             break;
         case CMD_CHECK:
             logWarning("NYI: command: check");

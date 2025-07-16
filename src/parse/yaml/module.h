@@ -1,5 +1,5 @@
-#ifndef PARSE_MODULE_H
-#define PARSE_MODULE_H
+#ifndef PARSE_YAML_MODULE_H
+#define PARSE_YAML_MODULE_H
 
 typedef struct module module;
 
@@ -56,4 +56,4 @@ module parseModule(const char* filePath);
 
 void freeModule(module* mod);
 
-#endif // PARSE_MODULE_H
+#endif // PARSE_YAML_MODULE_H

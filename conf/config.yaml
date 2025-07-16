@@ -7,9 +7,9 @@ config:
     description: "A dotfile manager from heaven"
 
   paths:
-    repo: "$HOME/.dotfiles"
-    backup: "$HOME/.dotfiles/backups"
-    logDir: "$HOME/.local/share/dm/logs"
+    repo: "$HOME/temp/.dotfiles/LMD"
+    backup: "$HOME/temp/.dotfiles/backups"
+    log: "$HOME/.local/share/dm/logs"
 
   behavior:
     autoGit: false
