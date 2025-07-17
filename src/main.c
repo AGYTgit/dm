@@ -30,60 +30,60 @@ int printHelpPage() {
 
 int printAppConf(config conf) {
     if (conf.error.type) {
-        printf("ERROR [%d]: %s\n", conf.error.type, conf.error.value ? conf.error.value : "");
+        logBlank("ERROR [%d]: %s\n", conf.error.type, conf.error.value ? conf.error.value : "");
         return 1;
     }
 
-    printf("\n");
+    logBlank("\n");
 
-    printf("name:        %s\n", conf.app.name);
-    printf("version:     %s\n", conf.app.version);
-    printf("description: %s\n", conf.app.description);
-    printf("repo:   %s\n", conf.paths.repo);
-    printf("backup: %s\n", conf.paths.backup);
-    printf("log:    %s\n", conf.paths.log);
-    printf("autoGit:               %s\n", conf.behavior.autoGit ? "true" : "false");
-    printf("promptForConfirmation: %s\n", conf.behavior.promptForConfirmation ? "true" : "false");
+    logBlank("name:        %s\n", conf.app.name);
+    logBlank("version:     %s\n", conf.app.version);
+    logBlank("description: %s\n", conf.app.description);
+    logBlank("repo:   %s\n", conf.paths.repo);
+    logBlank("backup: %s\n", conf.paths.backup);
+    logBlank("log:    %s\n", conf.paths.log);
+    logBlank("autoGit:               %s\n", conf.behavior.autoGit ? "true" : "false");
+    logBlank("promptForConfirmation: %s\n", conf.behavior.promptForConfirmation ? "true" : "false");
 
-    printf("\n");
+    logBlank("\n");
 
     return 0;
 }
 
 int printModuleConf(module mod) {
     if (mod.error.type) {
-        printf("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
+        logBlank("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
         return 1;
     }
 
-    printf("\n");
+    logBlank("\n");
 
-    printf("name: %s\n", mod.name);
-    printf("version: %s\n", mod.version);
-    printf("path: \'%s\'\n", mod.path);
+    logBlank("name: %s\n", mod.name);
+    logBlank("version: %s\n", mod.version);
+    logBlank("path: \'%s\'\n", mod.path);
 
-    printf("level: %d\n", mod.conf.level);
+    logBlank("level: %d\n", mod.conf.level);
 
-    printf("%s", (mod.deps.module.count + mod.deps.pacman.count + mod.deps.yay.count) > 0 ? "deps:\n" : "");
-    printf("%s", mod.deps.module.count > 0 ? "    module:\n" : "");
+    logBlank("%s", (mod.deps.module.count + mod.deps.pacman.count + mod.deps.yay.count) > 0 ? "deps:\n" : "");
+    logBlank("%s", mod.deps.module.count > 0 ? "    module:\n" : "");
     for (size_t i = 0; i < mod.deps.module.count; ++i) {
-        printf("        [%d]: %s\n", i, mod.deps.module.value[i]);
+        logBlank("        [%d]: %s\n", i, mod.deps.module.value[i]);
     }
-    printf("%s", mod.deps.pacman.count > 0 ? "    pacman:\n" : "");
+    logBlank("%s", mod.deps.pacman.count > 0 ? "    pacman:\n" : "");
     for (size_t i = 0; i < mod.deps.pacman.count; ++i) {
-        printf("        [%d]: %s\n", i, mod.deps.pacman.value[i]);
+        logBlank("        [%d]: %s\n", i, mod.deps.pacman.value[i]);
     }
-    printf("%s", mod.deps.yay.count > 0 ? "    yay:\n" : "");
+    logBlank("%s", mod.deps.yay.count > 0 ? "    yay:\n" : "");
     for (size_t i = 0; i < mod.deps.yay.count; ++i) {
-        printf("        [%d]: %s\n", i, mod.deps.yay.value[i]);
+        logBlank("        [%d]: %s\n", i, mod.deps.yay.value[i]);
     }
 
-    printf("%s", mod.links.count > 0 ? "links:\n" : "");
+    logBlank("%s", mod.links.count > 0 ? "links:\n" : "");
     for (size_t i = 0; i < mod.links.count; ++i) {
-        printf("    source: %s -> target: %s\n", mod.links.source[i], mod.links.target[i]);
+        logBlank("    source: %s -> target: %s\n", mod.links.source[i], mod.links.target[i]);
     }
 
-    printf("\n");
+    logBlank("\n");
 
     return 0;
 }
@@ -103,7 +103,7 @@ int getFlags(int argc, char* argv[], parsedFlags* flags, int* optindPtr) {
 int getCommand(int argc, char* argv[], parsedCommand* command, int* optindPtr) {
     *command = parseCommand(argc, argv, optindPtr);
 
-    if (command->error != ERROR_NONE) {
+    if (command->error) {
         logError("[%d] while parsing commands", command->error);
         return 1;
     }
@@ -111,7 +111,25 @@ int getCommand(int argc, char* argv[], parsedCommand* command, int* optindPtr) {
     return 0;
 }
 
+int getConfig(config* conf, const char* configPath) {
+    *conf = parseConfig(configPath);
+
+    if (conf->error.type) {
+        logError("[%d] while parsing config %s", conf->error.type, conf->error.value ? conf->error.value : "");
+        return 1;
+    }
+
+    return 0;
+}
+
+char* configPath = "../conf/config.yaml";
+
 int main(int argc, char* argv[]) {
+    config conf;
+    if (getConfig(&conf, configPath) != 0) {
+        return 1;
+    }
+
     int optind = 1;
     parsedFlags flags;
     if (getFlags(argc, argv, &flags, &optind) != 0) {
@@ -135,8 +153,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (flags.version) {
-        logWarning("NYI: flag version");
-        // print version
+        logDebug("flag version");
+        logBlank("%s\n", conf.app.version);
+        freeConfig(&conf);
         return 0;
     }
 
@@ -162,12 +181,13 @@ int main(int argc, char* argv[]) {
             logWarning("NYI: command: restore");
             break;
         case CMD_STATUS:
+            logBlank("--- %s ---\n", conf.app.version);
             logWarning("NYI: command: status");
 
             // temporary just to test config parsing
-            config conf = parseConfig("../conf/config.yaml");
             printAppConf(conf);
             freeConfig(&conf);
+            return 0;
 
             break;
         case CMD_CHECK:
@@ -185,6 +205,7 @@ int main(int argc, char* argv[]) {
             module mod = parseModule(buffer);
             printModuleConf(mod);
             freeModule(&mod);
+            return 0;
 
             break;
         case CMD_ULOAD:
@@ -193,8 +214,10 @@ int main(int argc, char* argv[]) {
         case CMD_VERSION:
             switch (command.action) {
                 case ACTION_GET:
-                    logWarning("NYI: command: version get");
-                    break;
+                    logDebug("command: version get");
+                    logBlank("%s\n", conf.app.version);
+                    freeConfig(&conf);
+                    return 0;
             }
             break;
         case CMD_PATH:
@@ -203,8 +226,10 @@ int main(int argc, char* argv[]) {
                     logWarning("NYI: command: path set %s", command.value);
                     break;
                 case ACTION_GET:
-                    logWarning("NYI: command: path get");
-                    break;
+                    logDebug("command: path get");
+                    logBlank("%s\n", conf.paths.repo);
+                    freeConfig(&conf);
+                    return 0;
             }
             break;
         case CMD_PROFILE:

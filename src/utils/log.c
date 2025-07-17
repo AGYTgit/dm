@@ -42,6 +42,9 @@ void setLogLevel(logLevel level) {
 
 char* getLogLevelStr() {
     switch (currentLogLevel) {
+    case LOG_LEVEL_BLANK:
+        return "BLANK";
+        break;
     case LOG_LEVEL_MUTE:
         return "MUTE";
         break;
@@ -58,6 +61,13 @@ char* getLogLevelStr() {
         return "DEBUG";
         break;
     }
+}
+
+void logBlank(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
 }
 
 void logError(const char* format, ...) {

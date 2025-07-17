@@ -2,6 +2,7 @@
 #define LOG_UTILS_H
 
 typedef enum {
+    LOG_LEVEL_BLANK,
     LOG_LEVEL_MUTE,      // Suppress all output (corresponds to --mute)
     LOG_LEVEL_ERROR,     // Only error messages (corresponds to --quiet)
     LOG_LEVEL_WARNING,   // Warning messages and above
@@ -19,6 +20,11 @@ void setLogLevel(logLevel level);
  * @brief Returnds log level
  */
 char* getLogLevelStr();
+
+/**
+ * @brief Logs just the raw message, no labels and no '\n' (for standard printing)
+ */
+void logBlank(const char* format, ...);
 
 /**
  * @brief Logs an error message
