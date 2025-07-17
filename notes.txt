@@ -1,2 +1,8 @@
 feature: git like functionality
     dm always keeps track of what is changed from last commit
+
+functionality: better yaml parsing
+    have a single parser which when given correct struct and data can parse any file
+
+feature: better log level setting
+    have a flag -l with an argument to set the log level
