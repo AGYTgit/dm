@@ -1,11 +1,16 @@
 module:
-    name: 'wofi'
-    version: 1.0
-    conf:
-        level: 1
-    deps:
-        module: []
-        pacman: ['wofi']
-        yay: []
-    links:
-        - {source: 'wofi', target: '$HOME/.config/wofi'}
+  name: 'wofi'
+  version: 1.0
+  conf:
+    level: 1
+  deps:
+    module: []
+    pacman: ['wofi']
+    yay: []
+  links:
+    - {source: 'wofi', target: '$HOME/.config/wofi'}
+  commands:
+    load:
+      - 'echo "loaded wofi"'
+    uload:
+     - 'echo "unloaded wofi"'

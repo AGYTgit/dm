@@ -83,6 +83,16 @@ int printModuleConf(module mod) {
         logBlank("    source: %s -> target: %s\n", mod.links.source[i], mod.links.target[i]);
     }
 
+    logBlank("%s", (mod.commands.load.count + mod.commands.uload.count) > 0 ? "commands:\n" : "");
+    logBlank("%s", mod.commands.load.count > 0 ? "    load:\n" : "");
+    for (size_t i = 0; i < mod.commands.load.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.commands.load.value[i]);
+    }
+    logBlank("%s", mod.commands.uload.count > 0 ? "    uload:\n" : "");
+    for (size_t i = 0; i < mod.commands.uload.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.commands.uload.value[i]);
+    }
+
     logBlank("\n");
 
     return 0;
@@ -196,7 +206,7 @@ int main(int argc, char* argv[]) {
         case CMD_HELP:
             logDebug("command: help");
             return printHelpPage();
-        case CMD_LOAD:
+        case CMD_LOAD: {
             logWarning("NYI: command: load %s", command.value);
 
             // temporary just to test module parsing
@@ -208,9 +218,38 @@ int main(int argc, char* argv[]) {
             return 0;
 
             break;
-        case CMD_ULOAD:
+        }
+        case CMD_ULOAD: {
             logWarning("NYI: command: uload %s", command.value);
+
+            //temporary to test module's command execution
+            char buffer[128];
+            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", command.value);
+            module mod = parseModule(buffer);
+            if (mod.error.type) {
+                logError("[%d] %s", mod.error.type, mod.error.value ? mod.error.value : "");
+                break;
+            }
+
+            for (size_t i = 0; i < mod.commands.load.count; ++i) {
+                logBlank("command on load [%d]: %s\n", i, mod.commands.load.value[i]);
+                int returnCode = system(mod.commands.load.value[i]);
+                if (returnCode != 0) {
+                    logBlank("command failed with return code: %d\n", returnCode);
+                }
+            }
+            for (size_t i = 0; i < mod.commands.uload.count; ++i) {
+                logBlank("command on uload [%d]: %s\n", i, mod.commands.uload.value[i]);
+                int returnCode = system(mod.commands.uload.value[i]);
+                if (returnCode != 0) {
+                    logBlank("command failed with return code: %d\n", returnCode);
+                }
+            }
+            freeModule(&mod);
+            return 0;
+
             break;
+        }
         case CMD_VERSION:
             switch (command.action) {
                 case ACTION_GET:

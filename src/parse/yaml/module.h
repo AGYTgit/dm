@@ -4,11 +4,11 @@
 typedef struct module module;
 
 typedef enum {
-    moduleErrorNone,
-    moduleErrorConfigFileNotFound,
-    moduleErrorYamlParserInitFailed,
-    moduleErrorYamlParserFailed,
-    moduleErrorMemoryAllocationFailed
+    MODULE_ERROR_NONE,
+    MODULE_ERROR_CONFIG_FILE_NOT_FOUND,
+    MODULE_ERROR_YAML_PARSER_INIT_FAILED,
+    MODULE_ERROR_YAML_PARSER_FAILED,
+    MODULE_ERROR_MEMORY_ALLOCATION_FAILED
 } moduleErrorType;
 
 typedef struct {
@@ -25,13 +25,18 @@ typedef struct {
 typedef struct {
     size_t count;
     char** value;
-} depsList;
+} countStrArrPair;
 
 typedef struct {
-    depsList module;
-    depsList pacman;
-    depsList yay;
+    countStrArrPair module;
+    countStrArrPair pacman;
+    countStrArrPair yay;
 } moduleDeps;
+
+typedef struct {
+    countStrArrPair load;
+    countStrArrPair uload;
+} moduleCommands;
 
 typedef struct {
     int level;
@@ -45,6 +50,7 @@ typedef struct module {
     moduleConf conf;
     moduleDeps deps;
     moduleLinks links;
+    moduleCommands commands;
 
     size_t subModCount;
     module* subMods;

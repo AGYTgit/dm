@@ -6,3 +6,6 @@ functionality: better yaml parsing
 
 feature: better log level setting
     have a flag -l with an argument to set the log level
+
+feature: custom command on load/uload
+    add arrays for custom commands to be executed when a module is being loaded/unloaded

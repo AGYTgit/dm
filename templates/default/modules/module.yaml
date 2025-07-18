@@ -1,10 +1,13 @@
 module:
-    name: 'module'
-    version: 1.0
-    conf:
-        level: -1
-    deps:
-        module: ['wofi']
-        pacman: []
-        yay: []
-    links:
+  name: 'module'
+  version: 1.0
+  conf:
+    level: -1
+  deps:
+    module: ['wofi']
+    pacman: []
+    yay: []
+  links:
+  commands:
+    load: []
+    uload: []
