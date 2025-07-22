@@ -4,6 +4,7 @@
 #include <yaml.h>
 
 #include "module.h"
+#include "../../structs/module.h"
 
 static void setModuleError(module* mod, moduleErrorType type, const char* value) {
     mod->error.type = type;
@@ -19,7 +20,7 @@ static void setModuleError(module* mod, moduleErrorType type, const char* value)
     }
 }
 
-static int addToList(countCharPtrPtrPair* list, const char* value) {
+static int addToList(countStrArrPair* list, const char* value) {
     size_t newCount = list->count + 1;
     char** newValues = realloc(list->value, newCount * sizeof(char*));
     if (!newValues) {

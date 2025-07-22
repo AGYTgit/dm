@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+/**
+ * @brief Helper function to create and return a command in an error state
+ */
 static void setCommandError(command* cmd, commandErrorType type, const char* value) {
     cmd->error.type = type;
 
@@ -13,6 +16,10 @@ static void setCommandError(command* cmd, commandErrorType type, const char* val
     }
 }
 
+/**
+ * @brief Parses the main command, its optional action and optional value
+ * This function is called after global flags have been parsed by parseFlags
+ */
 command parseCommand(int argc, char* argv[], int* optind) {
     command cmd = {0};
 
@@ -23,6 +30,7 @@ command parseCommand(int argc, char* argv[], int* optind) {
     char* cmdTypeStr = argv[(*optind)];
     (*optind)++;
 
+    // Identify command
     if (!strcmp(cmdTypeStr, "init")) {
         cmd.command = COMMAND_INIT;
         if ((*optind) < argc) {
@@ -51,8 +59,7 @@ command parseCommand(int argc, char* argv[], int* optind) {
             cmd.value = argv[(*optind)];
             (*optind)++;
         } else {
-            setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
-            return cmd;
+            return setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
         }
     } else if (!strcmp(cmdTypeStr, "uload")) {
         cmd.command = COMMAND_ULOAD;
@@ -60,18 +67,18 @@ command parseCommand(int argc, char* argv[], int* optind) {
             cmd.value = argv[(*optind)];
             (*optind)++;
         } else {
-            setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
-        return cmd;
+            return setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
         }
     }
+    // commands that can take either of set/get/list subcommands
     // NOTE: rewrite this to use a recursive function for parsing
     else if (!strcmp(cmdTypeStr, "version")) {
         cmd.command = COMMAND_VERSION;
         if ((*optind) < argc) {
-            if (!strcmp(argv[*optind], "set")) { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            if (!strcmp(argv[*optind], "set")) { return setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); }
             else if (!strcmp(argv[*optind], "get")) { cmd.action = ACTION_GET; }
-            else if (!strcmp(argv[*optind], "list")) { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
-            else { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            else if (!strcmp(argv[*optind], "list")) { return setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); }
+            else { return setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); }
             (*optind)++;
         } else {
             cmd.action = ACTION_GET;
@@ -85,13 +92,12 @@ command parseCommand(int argc, char* argv[], int* optind) {
                     cmd.value = argv[(*optind) + 1];
                     (*optind)++;
                 } else {
-                    setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
-                    return cmd;
+                    return setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
                 }
             }
             else if (!strcmp(argv[*optind], "get")) { cmd.action = ACTION_GET; }
-            else if (!strcmp(argv[*optind], "list")) { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
-            else { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            else if (!strcmp(argv[*optind], "list")) { return setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); }
+            else { return setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); }
             (*optind)++;
         } else {
             cmd.action = ACTION_GET;
@@ -105,13 +111,12 @@ command parseCommand(int argc, char* argv[], int* optind) {
                     cmd.value = argv[(*optind) + 1];
                     (*optind)++;
                 } else {
-                    setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
-                    return cmd;
+                    return setCommandError(COMMAND_ERROR_MISSING_VALUE);
                 }
             }
             else if (!strcmp(argv[*optind], "get")) { cmd.action = ACTION_GET; }
             else if (!strcmp(argv[*optind], "list")) { cmd.action = ACTION_LIST; } 
-            else { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            else { return setCommandError(COMMAND_ERROR_INVALID_ACTION); }
             (*optind)++;
         } else {
             cmd.action = ACTION_GET;
@@ -125,13 +130,12 @@ command parseCommand(int argc, char* argv[], int* optind) {
                     cmd.value = argv[(*optind) + 1];
                     (*optind)++;
                 } else {
-                    setCommandError(&cmd, COMMAND_ERROR_MISSING_VALUE, NULL);
-                    return cmd;
+                    return setCommandError(COMMAND_ERROR_MISSING_VALUE);
                 }
             }
             else if (!strcmp(argv[*optind], "get")) { cmd.action = ACTION_GET; }
-            else if (!strcmp(argv[*optind], "list")) { cmd.action = ACTION_LIST; }
-            else { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            else if (!strcmp(argv[*optind], "list")) { cmd.action = ACTION_LIST; } 
+            else { return setCommandError(COMMAND_ERROR_INVALID_ACTION); }
             (*optind)++;
         } else {
             cmd.action = ACTION_GET;
@@ -139,23 +143,21 @@ command parseCommand(int argc, char* argv[], int* optind) {
     } else if (!strcmp(cmdTypeStr, "module")) {
         cmd.command = COMMAND_MODULE;
         if ((*optind) < argc) {
-            if (!strcmp(argv[*optind], "set")) { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
-            else if (!strcmp(argv[*optind], "get")) { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
-            else if (!strcmp(argv[*optind], "list")) { cmd.action = ACTION_LIST; }
-            else { setCommandError(&cmd, COMMAND_ERROR_INVALID_ACTION, NULL); return cmd; }
+            if (!strcmp(argv[*optind], "set")) { return setCommandError(COMMAND_ERROR_INVALID_ACTION); }
+            else if (!strcmp(argv[*optind], "get")) { return setCommandError(COMMAND_ERROR_INVALID_ACTION); }
+            else if (!strcmp(argv[*optind], "list")) { cmd.action = ACTION_LIST; } 
+            else { return setCommandError(COMMAND_ERROR_INVALID_ACTION); }
             (*optind)++;
         } else {
             cmd.action = ACTION_LIST;
         }
     }
     else {
-        setCommandError(&cmd, COMMAND_ERROR_UNKNOWN_COMMAND, NULL);
-        return cmd;
+        return setCommandError(COMMAND_ERROR_UNKNOWN_COMMAND);
     }
 
     if ((*optind) < argc) {
-        setCommandError(&cmd, COMMAND_ERROR_UNEXPECTED_TRAILING_ARGS, NULL);
-        return cmd;
+        return setCommandError(COMMAND_ERROR_UNEXPECTED_TRAILING_ARGS);
     }
 
     return cmd;

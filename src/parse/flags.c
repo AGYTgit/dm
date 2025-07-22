@@ -13,8 +13,8 @@ static struct option allFlags[] = {
     {0, 0, 0, 0}
 };
 
-parsedFlags parseFlags(int argc, char* argv[], int* optindStart) {
-    parsedFlags flags = {0};
+flags parseFlags(int argc, char* argv[], int* optindStart) {
+    flags flags = {0};
 
     if (*optindStart >= argc) {
         return flags;
@@ -51,7 +51,7 @@ parsedFlags parseFlags(int argc, char* argv[], int* optindStart) {
             flags.version = true;
             break;
         case '?':
-            flags.parsingError = true;
+            flags.error.type = FLAG_ERROR_UNKNOWN_FLAG;
             return flags;
         }
     }

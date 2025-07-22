@@ -11,10 +11,11 @@
 #include "parse/yaml/module.h"
 #include "parse/yaml/config.h"
 
+char* configPath = "/home/agyt/projects/dm/dm/conf/config.yaml";
+char* helpPath = "/home/agyt/projects/dm/dm/src/resources/help.txt";
 
-int printHelpPage() {
-    char* helpPath = "resources/help.txt";
-    FILE* fh = fopen(helpPath, "r");
+int printHelpPage(char* fp) {
+    FILE* fh = fopen(fp, "r");
     if (!fh) {
         logError("Could not open help file at \'%s\'", helpPath);
         return 1;
@@ -98,11 +99,11 @@ int printModuleConf(module mod) {
     return 0;
 }
 
-int getFlags(int argc, char* argv[], parsedFlags* flags, int* optindPtr) {
+int getFlags(int argc, char* argv[], flags* flags, int* optindPtr) {
     *flags = parseFlags(argc, argv, optindPtr);
 
-    if (flags->parsingError) {
-        logError("flag parsing failed");
+    if (flags->error.type != 0) {
+        logError("[%d]: flag parsing failed %s", flags->error.type, flags->error.value ? flags->error.value : "");
         return 1;
     }
 
@@ -110,11 +111,11 @@ int getFlags(int argc, char* argv[], parsedFlags* flags, int* optindPtr) {
 }
 
 
-int getCommand(int argc, char* argv[], parsedCommand* command, int* optindPtr) {
-    *command = parseCommand(argc, argv, optindPtr);
+int getCommand(int argc, char* argv[], command* cmd, int* optindPtr) {
+    *cmd = parseCommand(argc, argv, optindPtr);
 
-    if (command->error) {
-        logError("[%d] while parsing commands", command->error);
+    if (cmd->error.type != 0) {
+        logError("[%d] while parsing commands %s", cmd->error.type, cmd->error.value ? cmd->error.value : "");
         return 1;
     }
 
@@ -132,8 +133,6 @@ int getConfig(config* conf, const char* configPath) {
     return 0;
 }
 
-char* configPath = "../conf/config.yaml";
-
 int main(int argc, char* argv[]) {
     config conf;
     if (getConfig(&conf, configPath) != 0) {
@@ -141,7 +140,7 @@ int main(int argc, char* argv[]) {
     }
 
     int optind = 1;
-    parsedFlags flags;
+    flags flags;
     if (getFlags(argc, argv, &flags, &optind) != 0) {
         return 1;
     }
@@ -159,7 +158,7 @@ int main(int argc, char* argv[]) {
 
     if (flags.help) {
         logDebug("flag: help");
-        return printHelpPage();
+        return printHelpPage(helpPath);
     }
 
     if (flags.version) {
@@ -169,28 +168,28 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    parsedCommand command;
-    if (getCommand(argc, argv, &command, &optind) != 0) {
+    command cmd;
+    if (getCommand(argc, argv, &cmd, &optind) != 0) {
         return 0;
     }
 
-    switch (command.cmd) {
-        case CMD_INIT:
-            logWarning("NYI: command: init %s", command.value);
+    switch (cmd.command) {
+        case COMMAND_INIT:
+            logWarning("NYI: command: init %s", cmd.value);
             break;
-        case CMD_COMMIT:
+        case COMMAND_COMMIT:
             logWarning("NYI: command: commit");
             break;
-        case CMD_APPLY:
+        case COMMAND_APPLY:
             logWarning("NYI: command: apply");
             break;
-        case CMD_BACKUP:
+        case COMMAND_BACKUP:
             logWarning("NYI: command: backup");
             break;
-        case CMD_RESTORE:
+        case COMMAND_RESTORE:
             logWarning("NYI: command: restore");
             break;
-        case CMD_STATUS:
+        case COMMAND_STATUS:
             logBlank("--- %s ---\n", conf.app.version);
             logWarning("NYI: command: status");
 
@@ -200,18 +199,18 @@ int main(int argc, char* argv[]) {
             return 0;
 
             break;
-        case CMD_CHECK:
+        case COMMAND_CHECK:
             logWarning("NYI: command: check");
             break;
-        case CMD_HELP:
+        case COMMAND_HELP:
             logDebug("command: help");
-            return printHelpPage();
-        case CMD_LOAD: {
-            logWarning("NYI: command: load %s", command.value);
+            return printHelpPage(helpPath);
+        case COMMAND_LOAD: {
+            logWarning("NYI: command: load %s", cmd.value);
 
             // temporary just to test module parsing
             char buffer[128];
-            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", command.value);
+            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", cmd.value);
             module mod = parseModule(buffer);
             printModuleConf(mod);
             freeModule(&mod);
@@ -219,12 +218,12 @@ int main(int argc, char* argv[]) {
 
             break;
         }
-        case CMD_ULOAD: {
-            logWarning("NYI: command: uload %s", command.value);
+        case COMMAND_ULOAD: {
+            logWarning("NYI: command: uload %s", cmd.value);
 
             //temporary to test module's command execution
             char buffer[128];
-            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", command.value);
+            snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", cmd.value);
             module mod = parseModule(buffer);
             if (mod.error.type) {
                 logError("[%d] %s", mod.error.type, mod.error.value ? mod.error.value : "");
@@ -250,8 +249,8 @@ int main(int argc, char* argv[]) {
 
             break;
         }
-        case CMD_VERSION:
-            switch (command.action) {
+        case COMMAND_VERSION:
+            switch (cmd.action) {
                 case ACTION_GET:
                     logDebug("command: version get");
                     logBlank("%s\n", conf.app.version);
@@ -259,10 +258,10 @@ int main(int argc, char* argv[]) {
                     return 0;
             }
             break;
-        case CMD_PATH:
-            switch (command.action) {
+        case COMMAND_PATH:
+            switch (cmd.action) {
                 case ACTION_SET:
-                    logWarning("NYI: command: path set %s", command.value);
+                    logWarning("NYI: command: path set %s", cmd.value);
                     break;
                 case ACTION_GET:
                     logDebug("command: path get");
@@ -271,10 +270,10 @@ int main(int argc, char* argv[]) {
                     return 0;
             }
             break;
-        case CMD_PROFILE:
-            switch (command.action) {
+        case COMMAND_PROFILE:
+            switch (cmd.action) {
                 case ACTION_SET:
-                    logWarning("NYI: command: profile set %s", command.value);
+                    logWarning("NYI: command: profile set %s", cmd.value);
                     break;
                 case ACTION_GET:
                     logWarning("NYI: command: profile get");
@@ -284,10 +283,10 @@ int main(int argc, char* argv[]) {
                     break;
             }
             break;
-        case CMD_THEME:
-            switch (command.action) {
+        case COMMAND_THEME:
+            switch (cmd.action) {
                 case ACTION_SET:
-                    logWarning("NYI: command: theme set %s", command.value);
+                    logWarning("NYI: command: theme set %s", cmd.value);
                     break;
                 case ACTION_GET:
                     logWarning("NYI: command: theme get");
@@ -297,8 +296,8 @@ int main(int argc, char* argv[]) {
                     break;
             }
             break;
-        case CMD_MODULE:
-            switch (command.action) {
+        case COMMAND_MODULE:
+            switch (cmd.action) {
                 case ACTION_LIST:
                     logWarning("NYI: command: module list");
                     break;

@@ -9,3 +9,6 @@ feature: better log level setting
 
 feature: custom command on load/uload
     add arrays for custom commands to be executed when a module is being loaded/unloaded
+
+optimization: store structs as bins
+    store structs that are likely to be reused without being modified in binary form so they don't have to be parsed from yaml again

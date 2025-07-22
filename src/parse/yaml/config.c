@@ -23,16 +23,17 @@ config parseConfig(const char* filePath) {
     yaml_parser_t parser;
     yaml_event_t event;
 
-    conf.error.type = configErrorNone;
+    conf.error.type = CONFIG_ERROR_NONE;
+
 
     file = fopen(filePath, "rb");
     if (!file) {
-        setConfigError(&conf, configErrorConfigFileNotFound, filePath);
+        setConfigError(&conf, CONFIG_ERROR_CONFIG_FILE_NOT_FOUND, filePath);
         return conf;
     }
 
     if (!yaml_parser_initialize(&parser)) {
-        setConfigError(&conf, configErrorYamlParserInitFailed, NULL);
+        setConfigError(&conf, CONFIG_ERROR_YAML_PARSER_INIT_FAILED, NULL);
         fclose(file);
         return conf;
     }
@@ -51,7 +52,7 @@ config parseConfig(const char* filePath) {
 
     while (!done) {
         if (!yaml_parser_parse(&parser, &event)) {
-            setConfigError(&conf, configErrorYamlParserFailed, parser.problem ? parser.problem : "Unknown YAML parsing error");
+            setConfigError(&conf, CONFIG_ERROR_YAML_PARSER_FAILED, parser.problem ? parser.problem : "Unknown YAML parsing error");
             yaml_event_delete(&event);
             break;
         }
@@ -128,7 +129,7 @@ config parseConfig(const char* filePath) {
                             } else if (strcmp(value, "false") == 0) {
                                 conf.behavior.autoGit = true;
                             } else {
-                                setConfigError(&conf, configErrorIncorrectBoolType, value);
+                                setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }
                         } else if (strcmp(currentKey, "promptForConfirmation") == 0) {
                             char* value = (char*)event.data.scalar.value;
@@ -137,7 +138,7 @@ config parseConfig(const char* filePath) {
                             } else if (strcmp(value, "false") == 0) {
                                 conf.behavior.promptForConfirmation = true;
                             } else {
-                                setConfigError(&conf, configErrorIncorrectBoolType, value);
+                                setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }
                         }
                     }
@@ -147,7 +148,7 @@ config parseConfig(const char* filePath) {
                 break;
         }
         yaml_event_delete(&event);
-        if (conf.error.type != configErrorNone) {
+        if (conf.error.type != CONFIG_ERROR_NONE) {
             done = 1;
         }
     }
