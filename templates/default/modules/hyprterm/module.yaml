@@ -1,0 +1,15 @@
+module:
+  name: 'hyprterm'
+  version: 1.0
+  conf:
+    level: 2
+    exec: 0
+    gitIgnore: []
+  deps:
+    module: []
+    pacman: ['zsh', 'alacritty', 'tmux', 'starship']
+    yay: []
+  links: []
+  commands:
+    load: []
+    uload: []

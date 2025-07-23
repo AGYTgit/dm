@@ -3,12 +3,14 @@ module:
   version: 1.0
   conf:
     level: 1
+    exec: 1
+    gitIgnore: []
   deps:
     module: []
     pacman: ['wofi']
     yay: []
   links:
-    - {source: 'wofi', target: '$HOME/.config/wofi'}
+    - {source: 'wofi', target: '$HOME/projects/dm/user-sym/.config/wofi'}
   commands:
     load:
       - 'echo "loaded wofi"'

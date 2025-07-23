@@ -1,0 +1,16 @@
+module:
+  name: 'alacritty'
+  version: 1.0
+  conf:
+    level: 1
+    exec: 0
+    gitIgnore: []
+  deps:
+    module: []
+    pacman: ['alacritty']
+    yay: []
+  links:
+    - {source: 'alacritty', target: '$HOME/projects/dm/user-sym/.config/alacritty'}
+  commands:
+    load: []
+    uload: []

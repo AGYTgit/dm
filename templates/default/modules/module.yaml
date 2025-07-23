@@ -4,7 +4,7 @@ module:
   conf:
     level: -1
   deps:
-    module: ['wofi']
+    module: ['hypr', 'hyprterm', 'wofi']
     pacman: []
     yay: []
   links:

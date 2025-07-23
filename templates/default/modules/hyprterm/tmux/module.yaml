@@ -1,0 +1,16 @@
+module:
+  name: 'tmux'
+  version: 1.0
+  conf:
+    level: 1
+    exec: 0
+    gitIgnore: []
+  deps:
+    module: []
+    pacman: ['tmux']
+    yay: []
+  links:
+    - {source: 'tmux/.tmux.conf', target: '$HOME/projects/dm/user-sym/.tmux.conf'}
+  commands:
+    load: []
+    uload: []

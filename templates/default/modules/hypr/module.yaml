@@ -1,0 +1,16 @@
+module:
+  name: 'hypr'
+  version: 1.0
+  conf:
+    level: 1
+    exec: 0
+    gitIgnore: []
+  deps:
+    module: []
+    pacman: ['hyprland']
+    yay: []
+  links:
+    - {source: 'hypr', target: '$HOME/projects/dm/user-sym/.config/hypr'}
+  commands:
+    load: []
+    uload: []

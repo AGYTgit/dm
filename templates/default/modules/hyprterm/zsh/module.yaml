@@ -1,0 +1,16 @@
+module:
+  name: 'zsh'
+  version: 1.0
+  conf:
+    level: 1
+    exec: 0
+    gitIgnore: []
+  deps:
+    module: []
+    pacman: ['zsh']
+    yay: []
+  links:
+    - {source: 'zsh/.zshrc', target: '$HOME/projects/dm/user-sym/.zshrc'}
+  commands:
+    load: []
+    uload: []
