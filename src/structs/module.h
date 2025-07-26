@@ -39,8 +39,10 @@ typedef struct {
 } moduleCommands;
 
 typedef struct {
+    int enable;
     int level;
     int exec;
+    countCharPtrPtrPair gitIgnore;
 } moduleConf;
 
 typedef struct module {

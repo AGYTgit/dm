@@ -23,15 +23,15 @@ static int addToList(countCharPtrPtrPair* list, const char* value) {
     size_t newCount = list->count + 1;
     char** newValues = realloc(list->value, newCount * sizeof(char*));
     if (!newValues) {
-        return 0;
+        return 1;
     }
     list->value = newValues;
     list->value[list->count] = strdup(value);
     if (!list->value[list->count]) {
-        return 0;
+        return 1;
     }
     list->count = newCount;
-    return 1;
+    return 0;
 }
 
 static int addLink(moduleLinks* links, const char* source, const char* target) {
@@ -105,6 +105,7 @@ module parseModule(const char* filePath) {
         stateNone,
         stateInModule,
         stateInConf,
+        stateInConfGitIgnore,
         stateInDeps,
         stateInModuleDeps,
         stateInPacmanDeps,
@@ -171,6 +172,12 @@ module parseModule(const char* filePath) {
                     }
                     free(currentKey);
                     currentKey = NULL;
+                } else if (state == stateInConf && currentKey) {
+                    if (strcmp(currentKey, "gitIgnore") == 0) {
+                        state = stateInConfGitIgnore;
+                    }
+                    free(currentKey);
+                    currentKey = NULL;
                 } else if (state == stateInDeps && currentKey) {
                     if (strcmp(currentKey, "module") == 0) {
                         state = stateInModuleDeps;
@@ -193,9 +200,14 @@ module parseModule(const char* filePath) {
                 break;
 
             case YAML_SEQUENCE_END_EVENT:
-                if (state == stateInModuleDeps || state == stateInPacmanDeps || state == stateInYayDeps) {
+                if (state == stateInConfGitIgnore) {
+                    state = stateInConf;
+                } else if (state == stateInModuleDeps ||
+                    state == stateInPacmanDeps ||
+                    state == stateInYayDeps) {
                     state = stateInDeps;
-                } else if (state == stateInCommandsLoad || state == stateInCommandsUload) {
+                } else if (state == stateInCommandsLoad ||
+                    state == stateInCommandsUload) {
                     state = stateInCommands;
                 } else if (state == stateInLinks) {
                     state = stateInModule;
@@ -218,8 +230,14 @@ module parseModule(const char* filePath) {
                             mod.path = strdup((char*)event.data.scalar.value);
                             if (!mod.path) { setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Module path allocation failed"); done = 1; }
                         }
-                    } else if (state == stateInConf && strcmp(currentKey, "level") == 0) {
-                        mod.conf.level = atoi((char*)event.data.scalar.value);
+                    } else if (state == stateInConf) {
+                        if (strcmp(currentKey, "enable") == 0) {
+                            mod.conf.enable = atoi((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "level") == 0) {
+                            mod.conf.level = atoi((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "exec") == 0) {
+                            mod.conf.exec = atoi((char*)event.data.scalar.value);
+                        }
                     } else if (state == stateInLinkEntry) {
                         if (strcmp(currentKey, "source") == 0) {
                             free(currentLinkSource);
@@ -227,7 +245,7 @@ module parseModule(const char* filePath) {
                             if (!currentLinkSource) { setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Link source allocation failed"); done = 1; }
                         } else if (strcmp(currentKey, "target") == 0 && currentLinkSource) {
                             if (!addLink(&mod.links, currentLinkSource, (char*)event.data.scalar.value)) {
-                                setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add link");
+                                setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse link");
                                 done = 1;
                             }
                             free(currentLinkSource);
@@ -244,29 +262,34 @@ module parseModule(const char* filePath) {
                         state == stateInCommands) {
                         currentKey = strdup((char*)event.data.scalar.value);
                         if (!currentKey) { setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Current key allocation failed"); done = 1; }
+                    } else if (state == stateInConfGitIgnore) {
+                        if (addToList(&mod.conf.gitIgnore, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse gitIgnore");
+                            done = 1;
+                        }
                     } else if (state == stateInModuleDeps) {
-                        if (!addToList(&mod.deps.module, (char*)event.data.scalar.value)) {
-                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add module dependency");
+                        if (addToList(&mod.deps.module, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse module dependency");
                             done = 1;
                         }
                     } else if (state == stateInPacmanDeps) {
-                        if (!addToList(&mod.deps.pacman, (char*)event.data.scalar.value)) {
-                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add pacman dependency");
+                        if (addToList(&mod.deps.pacman, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse pacman dependency");
                             done = 1;
                         }
                     } else if (state == stateInYayDeps) {
-                        if (!addToList(&mod.deps.yay, (char*)event.data.scalar.value)) {
-                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add yay dependency");
+                        if (addToList(&mod.deps.yay, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse yay dependency");
                             done = 1;
                         }
                     } else if (state == stateInCommandsLoad) {
-                        if (!addToList(&mod.commands.load, (char*)event.data.scalar.value)) {
-                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add load command");
+                        if (addToList(&mod.commands.load, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse load command");
                             done = 1;
                         }
                     } else if (state == stateInCommandsUload) {
-                        if (!addToList(&mod.commands.uload, (char*)event.data.scalar.value)) {
-                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to add unload command");
+                        if (addToList(&mod.commands.uload, (char*)event.data.scalar.value)) {
+                            setModuleError(&mod, MODULE_ERROR_MEMORY_ALLOCATION_FAILED, "Failed to parse uload command");
                             done = 1;
                         }
                     }

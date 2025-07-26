@@ -63,7 +63,15 @@ int printModuleConf(module mod) {
     logBlank("version: %s\n", mod.version);
     logBlank("path: \'%s\'\n", mod.path);
 
-    logBlank("level: %d\n", mod.conf.level);
+    logBlank("conf:\n");
+    logBlank("    enable: %d\n", mod.conf.enable);
+    logBlank("    level: %d\n", mod.conf.level);
+    logBlank("    exec: %d\n", mod.conf.exec);
+
+    logBlank("%s", mod.conf.gitIgnore.count > 0 ? "    gitIgnore:\n" : "");
+    for (size_t i = 0; i < mod.conf.gitIgnore.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.conf.gitIgnore.value[i]);
+    }
 
     logBlank("%s", (mod.deps.module.count + mod.deps.pacman.count + mod.deps.yay.count) > 0 ? "deps:\n" : "");
     logBlank("%s", mod.deps.module.count > 0 ? "    module:\n" : "");
