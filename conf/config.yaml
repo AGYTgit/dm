@@ -13,4 +13,5 @@ config:
 
   behavior:
     autoGit: false
+    autoApply: false
     promptForConfirmation: true

@@ -2,6 +2,7 @@ module:
   name: 'zsh'
   version: 1.0
   conf:
+    enable: 1
     level: 1
     exec: 0
     gitIgnore: []

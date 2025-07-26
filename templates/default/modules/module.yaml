@@ -2,6 +2,7 @@ module:
   name: 'module'
   version: 1.0
   conf:
+    enable: 1
     level: -1
   deps:
     module: ['hypr', 'hyprterm', 'wofi']
