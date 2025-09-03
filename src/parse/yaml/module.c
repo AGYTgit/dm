@@ -3,6 +3,8 @@
 #include <string.h>
 #include <yaml.h>
 
+#include "../../utils/log.h"
+
 #include "module.h"
 
 static void setModuleError(module* mod, moduleErrorType type, const char* value) {
@@ -349,3 +351,60 @@ void freeModule(module* mod) {
 
     free(mod->subMods);
 }
+
+int printModuleConf(module mod) {
+    if (mod.error.type) {
+        logBlank("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
+        return 1;
+    }
+
+    logBlank("\n");
+
+    logBlank("name: %s\n", mod.name);
+    logBlank("version: %s\n", mod.version);
+    logBlank("path: \'%s\'\n", mod.path);
+
+    logBlank("conf:\n");
+    logBlank("    enable: %d\n", mod.conf.enable);
+    logBlank("    level: %d\n", mod.conf.level);
+    logBlank("    exec: %d\n", mod.conf.exec);
+
+    logBlank("%s", mod.conf.gitIgnore.count > 0 ? "    gitIgnore:\n" : "");
+    for (size_t i = 0; i < mod.conf.gitIgnore.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.conf.gitIgnore.value[i]);
+    }
+
+    logBlank("%s", (mod.deps.module.count + mod.deps.pacman.count + mod.deps.yay.count) > 0 ? "deps:\n" : "");
+    logBlank("%s", mod.deps.module.count > 0 ? "    module:\n" : "");
+    for (size_t i = 0; i < mod.deps.module.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.deps.module.value[i]);
+    }
+    logBlank("%s", mod.deps.pacman.count > 0 ? "    pacman:\n" : "");
+    for (size_t i = 0; i < mod.deps.pacman.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.deps.pacman.value[i]);
+    }
+    logBlank("%s", mod.deps.yay.count > 0 ? "    yay:\n" : "");
+    for (size_t i = 0; i < mod.deps.yay.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.deps.yay.value[i]);
+    }
+
+    logBlank("%s", mod.links.count > 0 ? "links:\n" : "");
+    for (size_t i = 0; i < mod.links.count; ++i) {
+        logBlank("    source: %s -> target: %s\n", mod.links.source[i], mod.links.target[i]);
+    }
+
+    logBlank("%s", (mod.commands.load.count + mod.commands.uload.count) > 0 ? "commands:\n" : "");
+    logBlank("%s", mod.commands.load.count > 0 ? "    load:\n" : "");
+    for (size_t i = 0; i < mod.commands.load.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.commands.load.value[i]);
+    }
+    logBlank("%s", mod.commands.uload.count > 0 ? "    uload:\n" : "");
+    for (size_t i = 0; i < mod.commands.uload.count; ++i) {
+        logBlank("        [%d]: %s\n", i, mod.commands.uload.value[i]);
+    }
+
+    logBlank("\n");
+
+    return 0;
+}
+
