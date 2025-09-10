@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+
 #include "dis.h"
 
 #include "../utils/log.h"
@@ -37,11 +42,46 @@ functionDispatcher funcDis[COMMAND_COUNT][ACTION_COUNT] = {
 };
 
 int cmdNone(disArgs* data) {
+    logWarning("possible errer in function dispatcher, cmdNone should never happen");
     return 0;
 }
 
 int cmdInit(disArgs* data) {
-    logWarning("NYI: command: init %s", data->cmd.value);
+    logDebug("command: init \"%s\"", data->cmd.value);
+
+    struct stat st;
+    if (stat(data->cmd.value, &st) == 0) {
+        if (S_ISDIR(st.st_mode)) {
+            logError("\"%s\" is a directory", data->cmd.value);
+            return -1;
+        } else {
+            logError("\"%s\" is a file", data->cmd.value);
+            return -1;
+        }
+    }
+    if (errno != ENOENT) {
+        logError("checking destination path");
+        return -1;
+    }
+
+    {
+        char command[] = "mkdir -p ";
+        size_t buffSize = strlen(command) + strlen(data->cmd.value) + 3;
+        char buffer[buffSize];
+        snprintf(buffer, sizeof(buffer), "%s\"%s\"", command, data->cmd.value);
+
+        logDebug("executing: '%s'", buffer);
+        system(buffer);
+    }
+
+    char command[] = "cp -r ";
+    size_t buffSize = strlen(command) + strlen(data->conf.paths.template) + strlen(data->cmd.value) + 6;
+    char buffer[buffSize];
+    snprintf(buffer, sizeof(buffer), "%s\"%s\" \"%s\"", command, data->conf.paths.template, data->cmd.value);
+
+    logDebug("executing: '%s'", buffer);
+    system(buffer);
+
     return 0;
 }
 

@@ -26,6 +26,7 @@ typedef struct app {
 } configApp;
 
 typedef struct paths {
+    char* template; // TODO: needs logic for parsing
     char* repo;
     char* backup;
     char* log;

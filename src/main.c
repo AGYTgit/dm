@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (flags.version) {
-        logDebug("flag version");
+        logDebug("flag: version");
         logBlank("%s\n", conf.app.version);
         freeConfig(&conf);
         return 0;
@@ -132,6 +132,7 @@ int main(int argc, char* argv[]) {
         .cmd = cmd,
         .conf = conf,
     };
+    data.conf.paths.template = "/home/agyt/projects/dm/dm/templates/default";
     funcDis[cmd.command][cmd.action](&data);
 
     // switch (cmd.command) {
