@@ -4,7 +4,44 @@
 #include <stdbool.h>
 #include <yaml.h>
 
+#include "../../utils/log.h"
+
 #include "config.h"
+
+int getConfig(config* conf, const char* configPath) {
+    *conf = parseConfig(configPath);
+
+    if (conf->error.type) {
+        logError("[%d] while parsing config %s", conf->error.type, conf->error.value ? conf->error.value : "");
+        return 1;
+    }
+
+    return 0;
+}
+
+int printAppConf(config conf) {
+    if (conf.error.type) {
+        logBlank("ERROR [%d]: %s\n", conf.error.type, conf.error.value ? conf.error.value : "");
+        return 1;
+    }
+
+    logBlank("\n");
+    logBlank("name:        %s\n", conf.app.name);
+    logBlank("version:     %s\n", conf.app.version);
+    logBlank("description: %s\n", conf.app.description);
+    logBlank("\n");
+    logBlank("repo:     %s\n", conf.paths.repo);
+    logBlank("template: %s\n", conf.paths.template);
+    logBlank("backup:   %s\n", conf.paths.backup);
+    logBlank("log:      %s\n", conf.paths.log);
+    logBlank("\n");
+    logBlank("autoGit:               %s\n", conf.behavior.autoGit ? "true" : "false");
+    logBlank("autoApply:             %s\n", conf.behavior.autoApply ? "true" : "false");
+    logBlank("promptForConfirmation: %s\n", conf.behavior.promptForConfirmation ? "true" : "false");
+    logBlank("\n");
+
+    return 0;
+}
 
 static void setConfigError(config* conf, configErrorType type, const char* value) {
     conf->error.type = type;
@@ -12,6 +49,9 @@ static void setConfigError(config* conf, configErrorType type, const char* value
     free(conf->error.value);
     if (value) {
         conf->error.value = strdup(value);
+        if (!conf->error.value) {
+            conf->error.type = CONFIG_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
     } else {
         conf->error.value = NULL;
     }
@@ -114,6 +154,9 @@ config parseConfig(const char* filePath) {
                         if (strcmp(currentKey, "repo") == 0) {
                             free(conf.paths.repo);
                             conf.paths.repo = strdup((char*)event.data.scalar.value);
+                        } else if (strcmp(currentKey, "template") == 0) {
+                            free(conf.paths.template);
+                            conf.paths.template = strdup((char*)event.data.scalar.value);
                         } else if (strcmp(currentKey, "backup") == 0) {
                             free(conf.paths.backup);
                             conf.paths.backup = strdup((char*)event.data.scalar.value);
@@ -128,6 +171,15 @@ config parseConfig(const char* filePath) {
                                 conf.behavior.autoGit = true;
                             } else if (strcmp(value, "false") == 0) {
                                 conf.behavior.autoGit = true;
+                            } else {
+                                setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
+                            }
+                        } else if (strcmp(currentKey, "autoApply") == 0) {
+                            char* value = (char*)event.data.scalar.value;
+                            if (strcmp(value, "true") == 0) {
+                                conf.behavior.autoApply = true;
+                            } else if (strcmp(value, "false") == 0) {
+                                conf.behavior.autoApply = true;
                             } else {
                                 setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }

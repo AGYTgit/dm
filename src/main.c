@@ -31,28 +31,6 @@ int printHelpPage(char* fp) {
     return 0;
 }
 
-int printAppConf(config conf) {
-    if (conf.error.type) {
-        logBlank("ERROR [%d]: %s\n", conf.error.type, conf.error.value ? conf.error.value : "");
-        return 1;
-    }
-
-    logBlank("\n");
-
-    logBlank("name:        %s\n", conf.app.name);
-    logBlank("version:     %s\n", conf.app.version);
-    logBlank("description: %s\n", conf.app.description);
-    logBlank("repo:   %s\n", conf.paths.repo);
-    logBlank("backup: %s\n", conf.paths.backup);
-    logBlank("log:    %s\n", conf.paths.log);
-    logBlank("autoGit:               %s\n", conf.behavior.autoGit ? "true" : "false");
-    logBlank("promptForConfirmation: %s\n", conf.behavior.promptForConfirmation ? "true" : "false");
-
-    logBlank("\n");
-
-    return 0;
-}
-
 int getFlags(int argc, char* argv[], flags* flags, int* optindPtr) {
     *flags = parseFlags(argc, argv, optindPtr);
 
@@ -70,17 +48,6 @@ int getCommand(int argc, char* argv[], command* cmd, int* optindPtr) {
 
     if (cmd->error.type != 0) {
         logError("[%d] while parsing commands %s", cmd->error.type, cmd->error.value ? cmd->error.value : "");
-        return 1;
-    }
-
-    return 0;
-}
-
-int getConfig(config* conf, const char* configPath) {
-    *conf = parseConfig(configPath);
-
-    if (conf->error.type) {
-        logError("[%d] while parsing config %s", conf->error.type, conf->error.value ? conf->error.value : "");
         return 1;
     }
 
@@ -132,8 +99,9 @@ int main(int argc, char* argv[]) {
         .cmd = cmd,
         .conf = conf,
     };
-    data.conf.paths.template = "/home/agyt/projects/dm/dm/templates/default";
     funcDis[cmd.command][cmd.action](&data);
+
+    // TODO: free data
 
     // switch (cmd.command) {
     //     case COMMAND_INIT:

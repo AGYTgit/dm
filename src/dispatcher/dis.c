@@ -11,6 +11,9 @@
 #include "../utils/log.h"
 
 #include "../parse/yaml/module.h"
+#include "../parse/yaml/config.h"
+
+#include "../emit/yaml/config.h"
 
 #include "../structs/flags.h"
 #include "../structs/command.h"
@@ -106,15 +109,14 @@ int cmdRestore(disArgs* data) {
 }
 
 int cmdStatus(disArgs* data) {
-    // logBlank("--- %s ---\n", conf.app.version);
     logWarning("NYI: command: status");
-    // printAppConf(conf);
-    // freeConfig(&conf);
+    printAppConf(data->conf);
     return 0;
 }
 
 int cmdCheck(disArgs* data) {
     logWarning("NYI: command: check");
+    logBlank("output: %d", emitAppConf(&(data->conf), "./c.yaml"));
     return 0;
 }
 

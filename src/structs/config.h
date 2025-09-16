@@ -26,14 +26,15 @@ typedef struct app {
 } configApp;
 
 typedef struct paths {
-    char* template; // TODO: needs logic for parsing
     char* repo;
+    char* template;
     char* backup;
     char* log;
 } configPaths;
 
 typedef struct behavior {
     bool autoGit;
+    bool autoApply;
     bool promptForConfirmation;
 } configBehavior;
 
