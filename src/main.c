@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "utils/log.h"
+#include "utils/file.h"
 
 #include "parse/flags.h"
 #include "parse/commands.h"
@@ -12,24 +13,6 @@
 #include "parse/yaml/config.h"
 
 #include "dispatcher/dis.h"
-
-char* configPath = "/home/agyt/projects/dm/dm/conf/config.yaml";
-char* helpPath = "/home/agyt/projects/dm/dm/src/resources/help.txt";
-
-int printHelpPage(char* fp) {
-    FILE* fh = fopen(fp, "r");
-    if (!fh) {
-        logError("Could not open help file at \'%s\'", helpPath);
-        return 1;
-    }
-
-    int c;
-    while ((c = fgetc(fh)) != EOF) {
-        putchar(c);
-    }
-    fclose(fh);
-    return 0;
-}
 
 int getFlags(int argc, char* argv[], flags* flags, int* optindPtr) {
     *flags = parseFlags(argc, argv, optindPtr);
@@ -55,8 +38,12 @@ int getCommand(int argc, char* argv[], command* cmd, int* optindPtr) {
 }
 
 int main(int argc, char* argv[]) {
+    extraPaths exPaths;
+    exPaths.help = "/home/agyt/projects/dm/dm/src/resources/help.txt";
+    exPaths.conf = "/home/agyt/projects/dm/dm/conf/config.yaml";
+
     config conf;
-    if (getConfig(&conf, configPath) != 0) {
+    if (getConfig(&conf, exPaths.conf) != 0) {
         return 1;
     }
 
@@ -79,7 +66,7 @@ int main(int argc, char* argv[]) {
 
     if (flags.help) {
         logDebug("flag: help");
-        return printHelpPage(helpPath);
+        return printFile(exPaths.help);
     }
 
     if (flags.version) {
@@ -98,6 +85,7 @@ int main(int argc, char* argv[]) {
         .flags = flags,
         .cmd = cmd,
         .conf = conf,
+        .exPaths = exPaths
     };
     funcDis[cmd.command][cmd.action](&data);
 

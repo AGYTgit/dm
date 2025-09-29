@@ -9,6 +9,7 @@
 #include "dis.h"
 
 #include "../utils/log.h"
+#include "../utils/file.h"
 
 #include "../parse/yaml/module.h"
 #include "../parse/yaml/config.h"
@@ -19,12 +20,9 @@
 #include "../structs/command.h"
 #include "../structs/config.h"
 
-// char* configPath = "/home/agyt/projects/dm/dm/conf/config.yaml";
-// char* helpPath = "/home/agyt/projects/dm/dm/src/resources/help.txt";
-
 functionDispatcher funcDis[COMMAND_COUNT][ACTION_COUNT] = {
     // ENUM           ACTION_NONE     ACTION_SET      ACTION_GET      ACTION_LIST
-    [COMMAND_NONE]    = { cmdNone,        cmdNone,        cmdNone,        cmdNone },
+    [COMMAND_NONE]    = { cmdHelp,        cmdNone,        cmdNone,        cmdNone },
 
     [COMMAND_INIT]    = { cmdInit,        cmdNone,        cmdNone,        cmdNone },
     [COMMAND_COMMIT]  = { cmdCommit,      cmdNone,        cmdNone,        cmdNone },
@@ -73,7 +71,7 @@ int cmdInit(disArgs* data) {
         char buffer[buffSize];
         snprintf(buffer, sizeof(buffer), "%s\"%s\"", command, data->cmd.value);
 
-        logDebug("executing: '%s'", buffer);
+        logDebug("executing: '%s', len: %d", buffer, sizeof(buffer));
         system(buffer);
     }
 
@@ -122,7 +120,7 @@ int cmdCheck(disArgs* data) {
 
 int cmdHelp(disArgs* data) {
     logDebug("command: help");
-    // printHelpPage(helpPath);
+    printFile(data->exPaths.help);
     return 0;
 }
 

@@ -8,6 +8,7 @@ config:
 
   paths:
     repo: "$HOME/projects/dm/.dotfiles/LMD"
+    template: "$HOME/projects/dm/dm/templates/default/"
     backup: "$HOME/projects/dm/.dotfiles/backups"
     log: "$HOME/projects/dm/.dotfiles/logs"
 

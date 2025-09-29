@@ -1,5 +1,5 @@
 CC := gcc
-SRCS := main.c utils/log.c parse/flags.c parse/commands.c parse/yaml/module.c parse/yaml/config.c dispatcher/dis.c emit/yaml/config.c
+SRCS := main.c utils/log.c utils/file.c parse/flags.c parse/commands.c parse/yaml/module.c parse/yaml/config.c dispatcher/dis.c emit/yaml/config.c
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 
 LDFLAGS := -lyaml
