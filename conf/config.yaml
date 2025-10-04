@@ -7,7 +7,7 @@ config:
     description: "A dotfile manager from heaven"
 
   paths:
-    repo: "$HOME/projects/dm/.dotfiles/LMD"
+    repo: "$HOME/projects/dm/.dotfiles/lmd"
     template: "$HOME/projects/dm/dm/templates/default/"
     backup: "$HOME/projects/dm/.dotfiles/backups"
     log: "$HOME/projects/dm/.dotfiles/logs"

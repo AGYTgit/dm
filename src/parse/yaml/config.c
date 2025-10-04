@@ -170,7 +170,7 @@ config parseConfig(const char* filePath) {
                             if (strcmp(value, "true") == 0) {
                                 conf.behavior.autoGit = true;
                             } else if (strcmp(value, "false") == 0) {
-                                conf.behavior.autoGit = true;
+                                conf.behavior.autoGit = false;
                             } else {
                                 setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }
@@ -179,7 +179,7 @@ config parseConfig(const char* filePath) {
                             if (strcmp(value, "true") == 0) {
                                 conf.behavior.autoApply = true;
                             } else if (strcmp(value, "false") == 0) {
-                                conf.behavior.autoApply = true;
+                                conf.behavior.autoApply = false;
                             } else {
                                 setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }
@@ -188,7 +188,7 @@ config parseConfig(const char* filePath) {
                             if (strcmp(value, "true") == 0) {
                                 conf.behavior.promptForConfirmation = true;
                             } else if (strcmp(value, "false") == 0) {
-                                conf.behavior.promptForConfirmation = true;
+                                conf.behavior.promptForConfirmation = false;
                             } else {
                                 setConfigError(&conf, CONFIG_ERROR_INCORRECT_BOOL_TYPE, value);
                             }

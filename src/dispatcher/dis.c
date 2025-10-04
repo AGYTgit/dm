@@ -65,16 +65,6 @@ int cmdInit(disArgs* data) {
         return -1;
     }
 
-    {
-        char command[] = "mkdir -p ";
-        size_t buffSize = strlen(command) + strlen(data->cmd.value) + 3;
-        char buffer[buffSize];
-        snprintf(buffer, sizeof(buffer), "%s\"%s\"", command, data->cmd.value);
-
-        logDebug("executing: '%s', len: %d", buffer, sizeof(buffer));
-        system(buffer);
-    }
-
     char command[] = "cp -r ";
     size_t buffSize = strlen(command) + strlen(data->conf.paths.template) + strlen(data->cmd.value) + 6;
     char buffer[buffSize];
@@ -114,8 +104,8 @@ int cmdStatus(disArgs* data) {
 
 int cmdCheck(disArgs* data) {
     logWarning("NYI: command: check");
-    logBlank("output: %d", emitAppConf(&(data->conf), "./c.yaml"));
-    return 0;
+    // TODO: needs to be emitted to "<data->conf.paths.repo>/conf/config.yaml"
+    logBlank("output: %d", emitAppConf(&(data->conf), "/home/agyt/projects/dm/dm/conf/config(emitted).yaml"));    return 0;
 }
 
 int cmdHelp(disArgs* data) {
@@ -127,7 +117,7 @@ int cmdHelp(disArgs* data) {
 int cmdLoad(disArgs* data) {
     logWarning("NYI: command: load %s", data->cmd.value);
     char buffer[128];
-    snprintf(buffer, sizeof(buffer), "/home/agyt/projects/dm/dm/templates/default/%s/module.yaml", data->cmd.value);
+    snprintf(buffer, sizeof(buffer), "%s/modules/%s/module.yaml", data->conf.paths.repo, data->cmd.value);
     module mod = parseModule(buffer);
     printModuleConf(mod);
     return 0;
@@ -172,8 +162,7 @@ int cmdPathSet(disArgs* data) {
 
 int cmdPathGet(disArgs* data) {
     logDebug("command: path get");
-    // logBlank("%s\n", conf.paths.repo);
-    // freeConfig(&conf);
+    logBlank("%s\n", data->conf.paths.repo);
     return 0;
 }
 
