@@ -12,6 +12,7 @@
 #include "parse/yaml/module.h"
 #include "parse/yaml/config.h"
 
+#include "structs/dis.h"
 #include "dispatcher/dis.h"
 
 int getFlags(int argc, char* argv[], flags* flags, int* optindPtr) {
@@ -72,7 +73,6 @@ int main(int argc, char* argv[]) {
     if (flags.version) {
         logDebug("flag: version");
         logBlank("%s\n", conf.app.version);
-        freeConfig(&conf);
         return 0;
     }
 
@@ -89,139 +89,7 @@ int main(int argc, char* argv[]) {
     };
     funcDis[cmd.command][cmd.action](&data);
 
-    // TODO: free data
-
-    // switch (cmd.command) {
-    //     case COMMAND_INIT:
-    //         logWarning("NYI: command: init %s", cmd.value);
-    //         break;
-    //     case COMMAND_COMMIT:
-    //         logWarning("NYI: command: commit");
-    //         break;
-    //     case COMMAND_APPLY:
-    //         logWarning("NYI: command: apply");
-    //         break;
-    //     case COMMAND_BACKUP:
-    //         logWarning("NYI: command: backup");
-    //         break;
-    //     case COMMAND_RESTORE:
-    //         logWarning("NYI: command: restore");
-    //         break;
-    //     case COMMAND_STATUS:
-    //         logBlank("--- %s ---\n", conf.app.version);
-    //         logWarning("NYI: command: status");
-
-    //         // temporary just to test config parsing
-    //         printAppConf(conf);
-    //         freeConfig(&conf);
-    //         return 0;
-
-    //         break;
-    //     case COMMAND_CHECK:
-    //         logWarning("NYI: command: check");
-    //         break;
-    //     case COMMAND_HELP:
-    //         logDebug("command: help");
-    //         return printHelpPage(helpPath);
-    //     case COMMAND_LOAD: {
-    //         logWarning("NYI: command: load %s", cmd.value);
-
-    //         // temporary just to test module parsing
-    //         char buffer[128];
-    //         snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", cmd.value);
-    //         module mod = parseModule(buffer);
-    //         printModuleConf(mod);
-    //         freeModule(&mod);
-    //         return 0;
-
-    //         break;
-    //     }
-    //     case COMMAND_ULOAD: {
-    //         logWarning("NYI: command: uload %s", cmd.value);
-
-    //         //temporary to test module's command execution
-    //         char buffer[128];
-    //         snprintf(buffer, sizeof(buffer), "../templates/default/%s/module.yaml", cmd.value);
-    //         module mod = parseModule(buffer);
-    //         if (mod.error.type) {
-    //             logError("[%d] %s", mod.error.type, mod.error.value ? mod.error.value : "");
-    //             break;
-    //         }
-
-    //         for (size_t i = 0; i < mod.commands.load.count; ++i) {
-    //             logBlank("command on load [%d]: %s\n", i, mod.commands.load.value[i]);
-    //             int returnCode = system(mod.commands.load.value[i]);
-    //             if (returnCode != 0) {
-    //                 logBlank("command failed with return code: %d\n", returnCode);
-    //             }
-    //         }
-    //         for (size_t i = 0; i < mod.commands.uload.count; ++i) {
-    //             logBlank("command on uload [%d]: %s\n", i, mod.commands.uload.value[i]);
-    //             int returnCode = system(mod.commands.uload.value[i]);
-    //             if (returnCode != 0) {
-    //                 logBlank("command failed with return code: %d\n", returnCode);
-    //             }
-    //         }
-    //         freeModule(&mod);
-    //         return 0;
-
-    //         break;
-    //     }
-    //     case COMMAND_VERSION:
-    //         switch (cmd.action) {
-    //             case ACTION_GET:
-    //                 logDebug("command: version get");
-    //                 logBlank("%s\n", conf.app.version);
-    //                 freeConfig(&conf);
-    //                 return 0;
-    //         }
-    //         break;
-    //     case COMMAND_PATH:
-    //         switch (cmd.action) {
-    //             case ACTION_SET:
-    //                 logWarning("NYI: command: path set %s", cmd.value);
-    //                 break;
-    //             case ACTION_GET:
-    //                 logDebug("command: path get");
-    //                 logBlank("%s\n", conf.paths.repo);
-    //                 freeConfig(&conf);
-    //                 return 0;
-    //         }
-    //         break;
-    //     case COMMAND_PROFILE:
-    //         switch (cmd.action) {
-    //             case ACTION_SET:
-    //                 logWarning("NYI: command: profile set %s", cmd.value);
-    //                 break;
-    //             case ACTION_GET:
-    //                 logWarning("NYI: command: profile get");
-    //                 break;
-    //             case ACTION_LIST:
-    //                 logWarning("NYI: command: profile list");
-    //                 break;
-    //         }
-    //         break;
-    //     case COMMAND_THEME:
-    //         switch (cmd.action) {
-    //             case ACTION_SET:
-    //                 logWarning("NYI: command: theme set %s", cmd.value);
-    //                 break;
-    //             case ACTION_GET:
-    //                 logWarning("NYI: command: theme get");
-    //                 break;
-    //             case ACTION_LIST:
-    //                 logWarning("NYI: command: theme list");
-    //                 break;
-    //         }
-    //         break;
-    //     case COMMAND_MODULE:
-    //         switch (cmd.action) {
-    //             case ACTION_LIST:
-    //                 logWarning("NYI: command: module list");
-    //                 break;
-    //         }
-    //         break;
-    // }
+    freeDisArgs(&data);
 
     return 0;
 }

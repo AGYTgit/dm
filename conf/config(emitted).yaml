@@ -1,0 +1,14 @@
+config:
+  app:
+    name: "dm"
+    version: "0.0.1"
+    description: "A dotfile manager from heaven"
+  paths:
+    repo: "/home/agyt/projects/dm/.dotfiles/lmd"
+    template: "/home/agyt/projects/dm/dm/templates/default/"
+    backup: "/home/agyt/projects/dm/.dotfiles/backups"
+    log: "/home/agyt/projects/dm/.dotfiles/logs"
+  behavior:
+    autoGit: false
+    autoApply: false
+    promptForConfirmation: true

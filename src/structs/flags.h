@@ -25,4 +25,6 @@ typedef struct {
     flagError error;
 } flags;
 
+int freeFlags(flags* flags);
+
 #endif // STRUCT_FLAGS_H

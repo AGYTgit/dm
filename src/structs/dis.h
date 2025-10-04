@@ -4,7 +4,7 @@
 #include "../structs/flags.h"
 #include "../structs/command.h"
 #include "../structs/config.h"
-#include "../resources/exPaths.h"
+#include "../structs/exPaths.h"
 
 typedef struct {
     flags flags;
@@ -12,5 +12,7 @@ typedef struct {
     config conf;
     extraPaths exPaths;
 } disArgs;
+
+int freeDisArgs(disArgs* data);
 
 #endif // STRUCT_DIS_H

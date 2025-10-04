@@ -53,4 +53,6 @@ typedef struct {
     commandError       error;
 } command;
 
+int freeCommand(command* cmd);
+
 #endif // STRUCT_COMMAND_H

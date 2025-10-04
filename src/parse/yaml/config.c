@@ -212,19 +212,3 @@ config parseConfig(const char* filePath) {
     fclose(file);
     return conf;
 }
-
-void freeConfig(config* conf) {
-    if (!conf) {
-        return;
-    }
-
-    free(conf->app.name);
-    free(conf->app.version);
-    free(conf->app.description);
-
-    free(conf->paths.repo);
-    free(conf->paths.backup);
-    free(conf->paths.log);
-
-    free(conf->error.value);
-}

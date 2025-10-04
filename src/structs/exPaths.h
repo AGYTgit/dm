@@ -6,4 +6,6 @@ typedef struct {
     char* conf;
 } extraPaths;
 
+int freeExtraPaths(extraPaths* exPaths);
+
 #endif // EX_PATHS_H

@@ -1,0 +1,13 @@
+# dm - Current Session State
+
+state:
+  profile: "default"
+  theme: "default"
+
+  modules:
+    all:
+      - "hyprterm"
+      - "wofi"
+
+    loaded:
+      - "wofi"

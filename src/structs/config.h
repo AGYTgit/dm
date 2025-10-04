@@ -46,4 +46,6 @@ typedef struct config {
     configError error;
 } config;
 
+int freeConfig(config* conf);
+
 #endif // STRUCT_CONFIG_H
