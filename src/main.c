@@ -39,8 +39,8 @@ int getCommand(int argc, char* argv[], command* cmd, int* optindPtr) {
 
 int main(int argc, char* argv[]) {
     extraPaths exPaths;
-    exPaths.help = "/home/agyt/projects/dm/dm/src/resources/help.txt";
-    exPaths.conf = "/home/agyt/projects/dm/dm/conf/config.yaml";
+    expandEnvVars(&exPaths.help, "$HOME/projects/dm/dm/src/resources/help.txt");
+    expandEnvVars(&exPaths.conf, "$HOME/projects/dm/dm/conf/config.yaml");
 
     config conf;
     if (getConfig(&conf, exPaths.conf) != 0) {

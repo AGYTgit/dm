@@ -5,6 +5,7 @@
 #include <yaml.h>
 
 #include "../../utils/log.h"
+#include "../../utils/file.h"
 
 #include "config.h"
 
@@ -153,16 +154,16 @@ config parseConfig(const char* filePath) {
                     } else if (state == stateInPaths) {
                         if (strcmp(currentKey, "repo") == 0) {
                             free(conf.paths.repo);
-                            conf.paths.repo = strdup((char*)event.data.scalar.value);
+                            expandEnvVars(&conf.paths.repo, (char*)event.data.scalar.value);
                         } else if (strcmp(currentKey, "template") == 0) {
                             free(conf.paths.template);
-                            conf.paths.template = strdup((char*)event.data.scalar.value);
+                            expandEnvVars(&conf.paths.template, (char*)event.data.scalar.value);
                         } else if (strcmp(currentKey, "backup") == 0) {
                             free(conf.paths.backup);
-                            conf.paths.backup = strdup((char*)event.data.scalar.value);
+                            expandEnvVars(&conf.paths.backup, (char*)event.data.scalar.value);
                         } else if (strcmp(currentKey, "log") == 0) {
                             free(conf.paths.log);
-                            conf.paths.log = strdup((char*)event.data.scalar.value);
+                            expandEnvVars(&conf.paths.log, (char*)event.data.scalar.value);
                         }
                     } else if (state == stateInBehavior) {
                         if (strcmp(currentKey, "autoGit") == 0) {

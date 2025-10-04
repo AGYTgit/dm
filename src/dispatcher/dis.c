@@ -105,7 +105,8 @@ int cmdStatus(disArgs* data) {
 int cmdCheck(disArgs* data) {
     logWarning("NYI: command: check");
     // TODO: needs to be emitted to "<data->conf.paths.repo>/conf/config.yaml"
-    logBlank("output: %d", emitAppConf(&(data->conf), "/home/agyt/projects/dm/dm/conf/config(emitted).yaml"));    return 0;
+    logBlank("output: %d", emitAppConf(&(data->conf), "/home/agyt/projects/dm/dm/conf/config(emitted).yaml"));
+    return 0;
 }
 
 int cmdHelp(disArgs* data) {
