@@ -26,7 +26,7 @@ command parseCommand(int argc, char* argv[], int* optind) {
     if (!strcmp(cmdTypeStr, "init")) {
         cmd.command = COMMAND_INIT;
         if ((*optind) < argc) {
-            cmd.value = argv[(*optind)];
+            cmd.value = strdup(argv[(*optind)]);
             (*optind)++;
         } else {
             cmd.value = "default";
