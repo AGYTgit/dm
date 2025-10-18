@@ -104,8 +104,9 @@ int cmdStatus(disArgs* data) {
 
 int cmdCheck(disArgs* data) {
     logWarning("NYI: command: check");
-    // TODO: needs to be emitted to "<data->conf.paths.repo>/conf/config.yaml"
-    emitAppConf(&(data->conf), "/home/agyt/projects/dm/dm/conf/config(emitted).yaml");
+    char buffer[1024];
+    snprintf(buffer, sizeof(buffer), "%s/conf/config(emit).yaml", data->conf.paths.repo);
+    emitAppConf(&(data->conf), buffer);
     return 0;
 }
 
@@ -117,7 +118,7 @@ int cmdHelp(disArgs* data) {
 
 int cmdLoad(disArgs* data) {
     logWarning("NYI: command: load %s", data->cmd.value);
-    char buffer[128];
+    char buffer[1024];
     snprintf(buffer, sizeof(buffer), "%s/modules/%s/module.yaml", data->conf.paths.repo, data->cmd.value);
     module mod = parseModule(buffer);
     printModuleConf(mod);
@@ -126,7 +127,7 @@ int cmdLoad(disArgs* data) {
 
 int cmdUload(disArgs* data) {
     logWarning("NYI: command: uload %s", data->cmd.value);
-    char buffer[128];
+    char buffer[1024];
     snprintf(buffer, sizeof(buffer), "/home/agyt/projects/dm/dm/templates/default/%s/module.yaml", data->cmd.value);
     module mod = parseModule(buffer);
     if (mod.error.type) {
