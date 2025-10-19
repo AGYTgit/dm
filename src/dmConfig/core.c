@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "config.h"
+#include "core.h"
 
 int freeConfig(config* conf) {
     if (!conf) {

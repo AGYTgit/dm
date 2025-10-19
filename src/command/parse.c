@@ -1,6 +1,7 @@
-#include "commands.h"
 #include <string.h>
 #include <stdlib.h>
+
+#include "parse.h"
 
 static void setCommandError(command* cmd, commandErrorType type, const char* value) {
     cmd->error.type = type;

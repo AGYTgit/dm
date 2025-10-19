@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "log.h"
-#include "file.h"
+#include "util.h"
+#include "../log/util.h"
 
 int printFile(char* fp) {
     FILE* fh = fopen(fp, "r");

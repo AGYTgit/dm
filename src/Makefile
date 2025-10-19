@@ -1,5 +1,5 @@
 CC := gcc
-SRCS := main.c utils/log.c utils/file.c parse/flags.c parse/commands.c parse/yaml/module.c parse/yaml/config.c dispatcher/dis.c emit/yaml/config.c structs/flags.c structs/config.c structs/command.c structs/exPaths.c structs/dis.c
+SRCS := main.c log/util.c file/util.c command/core.c command/parse.c flag/core.c flag/parse.c dmConfig/core.c dmConfig/parseYaml.c dmConfig/emitYaml.c dmModule/parseYaml.c  dungeonConf/core.c dungeonConf/parseYaml.c exPaths/core.c funcDispatcher/core.c funcDispatcher/util.c
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 
 LDFLAGS := -lyaml

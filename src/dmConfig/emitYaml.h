@@ -1,7 +1,7 @@
 #ifndef EMIT_YAML_CONFIG_H
 #define EMIT_YAML_CONFIG_H
 
-#include "../../structs/config.h"
+#include "core.h"
 
 int emitAppConf(const config* conf, const char* filePath);
 

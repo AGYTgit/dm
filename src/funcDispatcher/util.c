@@ -6,19 +6,20 @@
 #include <errno.h>
 #include <string.h>
 
-#include "dis.h"
+#include "core.h"
+#include "util.h"
 
-#include "../utils/log.h"
-#include "../utils/file.h"
+#include "../log/util.h"
+#include "../file/util.h"
 
-#include "../parse/yaml/module.h"
-#include "../parse/yaml/config.h"
+#include "../dmModule/parseYaml.h"
 
-#include "../emit/yaml/config.h"
+#include "../dmConfig/parseYaml.h"
+#include "../dmConfig/emitYaml.h"
 
-#include "../structs/flags.h"
-#include "../structs/command.h"
-#include "../structs/config.h"
+#include "../flag/core.h"
+#include "../command/core.h"
+#include "../dmConfig/core.h"
 
 functionDispatcher funcDis[COMMAND_COUNT][ACTION_COUNT] = {
     // ENUM           ACTION_NONE     ACTION_SET      ACTION_GET      ACTION_LIST

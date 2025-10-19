@@ -1,7 +1,8 @@
-#include "log.h"
 #include <stdio.h>    // For fprintf, stderr, va_list, vsnprintf
 #include <stdarg.h>   // For va_list, va_start, va_end
 #include <time.h>     // For time, localtime, strftime (for timestamps)
+
+#include "util.h"
 
 // Static global variable to hold the current logging threshold
 static logLevel currentLogLevel = LOG_LEVEL_INFO; // Default to INFO
@@ -42,25 +43,21 @@ void setLogLevel(logLevel level) {
 
 char* getLogLevelStr() {
     switch (currentLogLevel) {
-    case LOG_LEVEL_BLANK:
-        return "BLANK";
-        break;
-    case LOG_LEVEL_MUTE:
-        return "MUTE";
-        break;
-    case LOG_LEVEL_ERROR:
-        return "ERROR";
-        break;
-    case LOG_LEVEL_WARNING:
-        return "WARNING";
-        break;
-    case LOG_LEVEL_INFO:
-        return "INFO";
-        break;
-    case LOG_LEVEL_DEBUG:
-        return "DEBUG";
-        break;
+        case LOG_LEVEL_BLANK: {
+            return "BLANK";
+        } case LOG_LEVEL_MUTE: {
+            return "MUTE";
+        } case LOG_LEVEL_ERROR: {
+            return "ERROR";
+        } case LOG_LEVEL_WARNING: {
+            return "WARNING";
+        } case LOG_LEVEL_INFO: {
+            return "INFO";
+        } case LOG_LEVEL_DEBUG: {
+            return "DEBUG";
+        }
     }
+    return "DEBUG";
 }
 
 void logBlank(const char* format, ...) {

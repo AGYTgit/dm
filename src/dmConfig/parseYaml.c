@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <yaml.h>
 
-#include "../../utils/log.h"
-#include "../../utils/file.h"
+#include "../log/util.h"
+#include "../file/util.h"
 
-#include "config.h"
+#include "parseYaml.h"
 
 int getConfig(config* conf, const char* configPath) {
     *conf = parseConfig(configPath);

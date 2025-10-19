@@ -1,7 +1,7 @@
 #ifndef PARSE_YAML_MODULE_H
 #define PARSE_YAML_MODULE_H
 
-#include "../../structs/module.h"
+#include "core.h"
 
 module parseModule(const char* filePath);
 

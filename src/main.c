@@ -3,17 +3,20 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "utils/log.h"
-#include "utils/file.h"
+#include "log/util.h"
+#include "file/util.h"
 
-#include "parse/flags.h"
-#include "parse/commands.h"
+#include "flag/core.h"
+#include "flag/parse.h"
 
-#include "parse/yaml/module.h"
-#include "parse/yaml/config.h"
+#include "command/core.h"
+#include "command/parse.h"
 
-#include "structs/dis.h"
-#include "dispatcher/dis.h"
+#include "dmConfig/core.h"
+#include "dmConfig/parseYaml.h"
+
+#include "funcDispatcher/core.h"
+#include "funcDispatcher/util.h"
 
 int getFlags(int argc, char* argv[], flags* flags, int* optindPtr) {
     *flags = parseFlags(argc, argv, optindPtr);

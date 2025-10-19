@@ -1,8 +1,8 @@
 #ifndef DISPATCHER_COMMAND_H
 #define DISPATCHER_COMMAND_H
 
-#include "../structs/dis.h"
-#include "../structs/command.h"
+#include "core.h"
+#include "util.h"
 
 typedef int (*functionDispatcher)(disArgs* data);
 

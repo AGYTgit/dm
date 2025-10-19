@@ -1,7 +1,7 @@
 #ifndef PARSE_COMMANDS_H
 #define PARSE_COMMANDS_H
 
-#include "../structs/command.h"
+#include "core.h"
 
 command parseCommand(int argc, char* argv[], int* optind);
 

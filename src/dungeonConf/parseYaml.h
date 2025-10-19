@@ -1,7 +1,7 @@
 #ifndef PARSE_YAML_DUNGEON_H
 #define PARSE_YAML_DUNGEON_H
 
-#include "../../structs/dungeonConf.h"
+#include "core.h"
 
 config parseDungeonConf(const char* filePath);
 

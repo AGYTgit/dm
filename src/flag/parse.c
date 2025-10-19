@@ -1,5 +1,6 @@
-#include "flags.h"
 #include <getopt.h>
+
+#include "parse.h"
 
 // Define long flags for getopt_long
 static struct option allFlags[] = {

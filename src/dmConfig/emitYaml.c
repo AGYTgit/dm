@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <yaml.h>
 
-#include "../../utils/log.h"
+#include "../log/util.h"
 
-#include "config.h"
+#include "core.h"
 
 static int emit_key_plain_value(yaml_emitter_t* emitter, const char* key, const char* value) {
     yaml_event_t event;

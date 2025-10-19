@@ -1,7 +1,7 @@
 #ifndef PARSE_YAML_CONFIG_H
 #define PARSE_YAML_CONFIG_H
 
-#include "../../structs/config.h"
+#include "core.h"
 
 config parseConfig(const char* filePath);
 

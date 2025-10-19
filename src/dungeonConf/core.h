@@ -1,7 +1,6 @@
 #ifndef STRUCT_DUNGEON_CONF_H
 #define STRUCT_DUNGEON_CONF_H
 
-
 typedef enum {
     CONFIG_ERROR_NONE,
     CONFIG_ERROR_CONFIG_FILE_NOT_FOUND,
@@ -16,11 +15,15 @@ typedef struct {
     char* value;
 } dungeonConfError;
 
+typedef struct {
+    char* name;
+    boolean state;
+} dungeonModule ;
+
 typedef struct dungeonConf {
     char* profile;
     char* theme;
-    char** allModules;
-    char** loadedModules;
+    dungeonModule* modules;
 
     configError error;
 } dungeonConf;

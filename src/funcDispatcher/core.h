@@ -1,10 +1,10 @@
 #ifndef STRUCT_DIS_H
 #define STRUCT_DIS_H
 
-#include "../structs/flags.h"
-#include "../structs/command.h"
-#include "../structs/config.h"
-#include "../structs/exPaths.h"
+#include "../flag/core.h"
+#include "../command/core.h"
+#include "../dmConfig/core.h"
+#include "../exPaths/core.h"
 
 typedef struct {
     flags flags;

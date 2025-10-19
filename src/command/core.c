@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "command.h"
+#include "core.h"
 
 int freeCommand(command* cmd) {
     free(cmd->value);

@@ -3,9 +3,9 @@
 #include <string.h>
 #include <yaml.h>
 
-#include "../../utils/log.h"
+#include "../log/util.h"
 
-#include "module.h"
+#include "parseYaml.h"
 
 static void setModuleError(module* mod, moduleErrorType type, const char* value) {
     mod->error.type = type;
@@ -127,6 +127,8 @@ module parseModule(const char* filePath) {
         }
 
         switch (event.type) {
+            case YAML_NO_EVENT:
+            case YAML_ALIAS_EVENT:
             case YAML_STREAM_START_EVENT:
             case YAML_DOCUMENT_START_EVENT:
                 if (state == stateNone) {

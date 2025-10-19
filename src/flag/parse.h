@@ -1,7 +1,7 @@
 #ifndef PARSE_FLAGS_H
 #define PARSE_FLAGS_H
 
-#include "../structs/flags.h"
+#include "core.h"
 
 flags parseFlags(int argc, char* argv[], int* optind);
 
