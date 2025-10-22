@@ -45,6 +45,7 @@ functionDispatcher funcDis[COMMAND_COUNT][ACTION_COUNT] = {
 
 int cmdNone(disArgs* data) {
     logWarning("possible errer in function dispatcher, cmdNone should never happen");
+    (void) data;
     return 0;
 }
 
@@ -79,21 +80,25 @@ int cmdInit(disArgs* data) {
 
 int cmdCommit(disArgs* data) {
     logWarning("NYI: command: commit");
+    (void) data;
     return 0;
 }
 
 int cmdApply(disArgs* data) {
     logWarning("NYI: command: apply");
+    (void) data;
     return 0;
 }
 
 int cmdBackup(disArgs* data) {
     logWarning("NYI: command: backup");
+    (void) data;
     return 0;
 }
 
 int cmdRestore(disArgs* data) {
     logWarning("NYI: command: restore");
+    (void) data;
     return 0;
 }
 
@@ -160,6 +165,7 @@ int cmdVersionGet(disArgs* data) {
 
 int cmdPathSet(disArgs* data) {
     logWarning("NYI: command: path set %s", data->cmd.value);
+    (void) data;
     return 0;
 }
 
@@ -176,11 +182,13 @@ int cmdProfileSet(disArgs* data) {
 
 int cmdProfileGet(disArgs* data) {
     logWarning("NYI: command: profile get");
+    (void) data;
     return 0;
 }
 
 int cmdProfileList(disArgs* data) {
     logWarning("NYI: command: profile list");
+    (void) data;
     return 0;
 }
 
@@ -191,15 +199,18 @@ int cmdThemeSet(disArgs* data) {
 
 int cmdThemeGet(disArgs* data) {
     logWarning("NYI: command: theme get");
+    (void) data;
     return 0;
 }
 
 int cmdThemeList(disArgs* data) {
     logWarning("NYI: command: theme list");
+    (void) data;
     return 0;
 }
 
 int cmdModuleList(disArgs* data) {
     logWarning("NYI: command: module list");
+    (void) data;
     return 0;
 }

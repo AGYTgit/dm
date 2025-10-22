@@ -99,6 +99,9 @@ config parseConfig(const char* filePath) {
         }
 
         switch (event.type) {
+            case YAML_NO_EVENT:
+            case YAML_ALIAS_EVENT:
+                break;
             case YAML_STREAM_START_EVENT:
             case YAML_DOCUMENT_START_EVENT:
                 break;
