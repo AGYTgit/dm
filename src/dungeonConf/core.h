@@ -1,33 +1,37 @@
 #ifndef STRUCT_DUNGEON_CONF_H
 #define STRUCT_DUNGEON_CONF_H
 
+#include <stdbool.h>
+#include <stdlib.h>
+
 typedef enum {
-    CONFIG_ERROR_NONE,
-    CONFIG_ERROR_CONFIG_FILE_NOT_FOUND,
-    CONFIG_ERROR_YAML_PARSER_INIT_FAILED,
-    CONFIG_ERROR_YAML_PARSER_FAILED,
-    CONFIG_ERROR_MEMORY_ALLOCATION_FAILED,
-    CONFIG_ERROR_INCORRECT_BOOL_TYPE
+    DUNGEON_CONF_ERR_NONE,
+    DUNGEON_CONF_ERR_CONFIG_FILE_NOT_FOUND,
+    DUNGEON_CONF_ERR_YAML_PARSER_INIT_FAILED,
+    DUNGEON_CONF_ERR_YAML_PARSER_FAILED,
+    DUNGEON_CONF_ERR_MEMORY_ALLOCATION_FAILED,
+    DUNGEON_CONF_ERR_INCORRECT_BOOL_TYPE
 } dungeonConfErrorType;
 
 typedef struct {
-    configErrorType type;
+    dungeonConfErrorType type;
     char* value;
 } dungeonConfError;
 
 typedef struct {
     char* name;
-    boolean state;
+    bool state;
 } dungeonModule ;
 
 typedef struct dungeonConf {
     char* profile;
     char* theme;
     dungeonModule* modules;
+    size_t moduleCount;
 
-    configError error;
+    dungeonConfError error;
 } dungeonConf;
 
-int freeConfig(config* conf);
+int freeDungeonConf(dungeonConf* conf);
 
 #endif // STRUCT_DUNGEON_CONF_H

@@ -3,10 +3,8 @@
 
 #include "core.h"
 
-config parseDungeonConf(const char* filePath);
+dungeonConf parseDungeonConf(const char* filePath);
 
-int getConfig(config* conf, const char* configPath);
-
-int printAppConf(config conf);
+int getDungeonConf(dungeonConf* conf, const char* filePath);
 
 #endif // PARSE_YAML_DUNGEON_H

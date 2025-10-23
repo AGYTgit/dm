@@ -13,7 +13,7 @@ int getConfig(config* conf, const char* configPath) {
     *conf = parseConfig(configPath);
 
     if (conf->error.type) {
-        logError("[%d] while parsing config %s", conf->error.type, conf->error.value ? conf->error.value : "");
+        logError("[%d] while parsing dmConfig %s", conf->error.type, conf->error.value ? conf->error.value : "");
         return 1;
     }
 
@@ -65,7 +65,6 @@ config parseConfig(const char* filePath) {
     yaml_event_t event;
 
     conf.error.type = CONFIG_ERROR_NONE;
-
 
     file = fopen(filePath, "rb");
     if (!file) {
@@ -120,7 +119,7 @@ config parseConfig(const char* filePath) {
                     } else if (strcmp(currentKey, "behavior") == 0) {
                         state = stateInBehavior;
                     }
-                    free(currentKey);
+                    free(currentKey); // WARNING: probably should by outside of the else if
                     currentKey = NULL;
                 }
                 break;
@@ -136,7 +135,7 @@ config parseConfig(const char* filePath) {
                 break;
             case YAML_SCALAR_EVENT:
                 if (!currentKey) {
-                    if (state == stateInConfig ||
+                    if (state == stateInConfig || // WARNING: unnecessary if (always true)
                         state == stateInApp ||
                         state == stateInPaths ||
                         state == stateInBehavior) {

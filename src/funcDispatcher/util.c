@@ -12,10 +12,12 @@
 #include "../log/util.h"
 #include "../file/util.h"
 
-#include "../dmModule/parseYaml.h"
-
 #include "../dmConfig/parseYaml.h"
 #include "../dmConfig/emitYaml.h"
+
+#include "../dungeonModule/parseYaml.h"
+
+#include "../dungeonConf/parseYaml.h"
 
 #include "../flag/core.h"
 #include "../command/core.h"
@@ -87,6 +89,11 @@ int cmdCommit(disArgs* data) {
 int cmdApply(disArgs* data) {
     logWarning("NYI: command: apply");
     (void) data;
+
+    dungeonConf conf = {0};
+    getDungeonConf(&conf, "/home/agyt/projects/dm/dm/conf/current.yaml");
+    freeDungeonConf(&conf);
+
     return 0;
 }
 
