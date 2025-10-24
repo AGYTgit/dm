@@ -9,7 +9,7 @@
 
 #include "parseYaml.h"
 
-int getDungeonConfig(dungeonConf* conf, const char* filePath) {
+int getDungeonConf(dungeonConf* conf, const char* filePath) {
     *conf = parseDungeonConf(filePath);
 
     if (conf->error.type) {
@@ -74,28 +74,39 @@ dungeonConf parseDungeonConf(const char* filePath) {
         }
 
         switch (event.type) {
-            case YAML_NO_EVENT:
-            case YAML_ALIAS_EVENT:
-                break;
-            case YAML_STREAM_START_EVENT:
-            case YAML_DOCUMENT_START_EVENT:
-                break;
             case YAML_STREAM_END_EVENT:
             case YAML_DOCUMENT_END_EVENT:
                 done = 1;
+            case YAML_NO_EVENT:
+            case YAML_ALIAS_EVENT:
+            case YAML_STREAM_START_EVENT:
+            case YAML_DOCUMENT_START_EVENT:
                 break;
-            case YAML_MAPPING_START_EVENT:
-                if (state == stateNone) {
-                    state = stateInState;
-                } else if (state == stateInState && currentKey) {
-                    if (strcmp(currentKey, "modules") == 0) {
-                        state = stateInModules;
-                    }
-                } else if (state == stateInModules && currentKey) {
+            case YAML_SEQUENCE_START_EVENT:
+                if (state == stateInModules && currentKey) {
                     if (strcmp(currentKey, "all") == 0) {
                         state = stateInModulesAll;
                     } else if (strcmp(currentKey, "loaded") == 0) {
                         state = stateInModulesLoaded;
+                    }
+                }
+                free(currentKey);
+                currentKey = NULL;
+                break;
+            case YAML_SEQUENCE_END_EVENT:
+                if (state == stateInModulesAll ||
+                    state == stateInModulesLoaded) {
+                    state = stateInModules;
+                }
+                break;
+            case YAML_MAPPING_START_EVENT:
+                if (state == stateNone && currentKey) {
+                    if (strcmp(currentKey, "state") == 0) {
+                        state = stateInState;
+                    }
+                } else if (state == stateInState && currentKey) {
+                    if (strcmp(currentKey, "modules") == 0) {
+                        state = stateInModules;
                     }
                 }
                 free(currentKey);
@@ -109,36 +120,36 @@ dungeonConf parseDungeonConf(const char* filePath) {
                     state = stateInModules;
                 }
                 break;
-            case YAML_SEQUENCE_START_EVENT:
-            case YAML_SEQUENCE_END_EVENT:
-                break;
             case YAML_SCALAR_EVENT:
                 if (!currentKey) {
                     currentKey = strdup((char*)event.data.scalar.value);
-                } else {
-                    if (state == stateInState) {
-                        if (strcmp(currentKey, "profile") == 0) {
-                            free(conf.profile);
-                            conf.profile = strdup((char*)event.data.scalar.value);
-                            if (!conf.profile) { setDungeonConfErr(&conf, DUNGEON_CONF_ERR_MEMORY_ALLOCATION_FAILED, "dungeonConf profile allocation failed"); done = 1; }
-                        } else if (strcmp(currentKey, "theme") == 0) {
-                            free(conf.theme);
-                            conf.theme = strdup((char*)event.data.scalar.value);
-                            if (!conf.theme) { setDungeonConfErr(&conf, DUNGEON_CONF_ERR_MEMORY_ALLOCATION_FAILED, "dungeonConf theme allocation failed"); done = 1; }
-                        }
-                    } else if (state == stateInModulesAll) {
-                        free(conf.modules[conf.moduleCount - 1].name);
-                        conf.modules[conf.moduleCount - 1].name = strdup((char*)event.data.scalar.value);
-                        conf.moduleCount++;
-                        if (strcmp(currentKey, "all") == 0) {
+
+                    if (state == stateInModulesAll ||
+                        state == stateInModulesLoaded) {
+                        if (state == stateInModulesAll) {
+                            conf.moduleCount++;
+                            conf.modules = realloc(conf.modules, (conf.moduleCount) * sizeof(dungeonModule));
+                            conf.modules[conf.moduleCount - 1].name = strdup((char*)event.data.scalar.value);
                             conf.modules[conf.moduleCount - 1].state = 0;
-                        } else if (strcmp(currentKey, "loaded") == 0) {
+                        } else {
                             for (size_t i = 0; i < conf.moduleCount; ++i) {
-                                if (strcmp(conf.modules[i].name, (char*)event.data.scalar.value)) { // WARNING: might couse problems if a loaded module is not in all modules
-                                    conf.modules[conf.moduleCount - 1].state = 1;
+                                if (strcmp(conf.modules[i].name, (char*)event.data.scalar.value) == 0) {
+                                    conf.modules[i].state = 1;
                                     break;
                                 }
                             }
+                        }
+                        free(currentKey);
+                        currentKey = NULL;
+                    }
+                } else {
+                    if (state == stateInState) {
+                        if (strcmp(currentKey, "profile") == 0) {
+                            conf.profile = strdup((char*)event.data.scalar.value);
+                            if (!conf.profile) { setDungeonConfErr(&conf, DUNGEON_CONF_ERR_MEMORY_ALLOCATION_FAILED, "dungeonConf profile allocation failed"); done = 1; }
+                        } else if (strcmp(currentKey, "theme") == 0) {
+                            conf.theme = strdup((char*)event.data.scalar.value);
+                            if (!conf.theme) { setDungeonConfErr(&conf, DUNGEON_CONF_ERR_MEMORY_ALLOCATION_FAILED, "dungeonConf theme allocation failed"); done = 1; }
                         }
                     }
                     free(currentKey);

@@ -1,13 +1,13 @@
 # dm - Current Session State
 
 state:
-  profile: "default-pc"
+  profile: "default"
   theme: "default"
 
   modules:
     all:
-      - "hypr"
-      - "nvim"
+      - "hyprterm"
+      - "hyprterm/zsh"
       - "wofi"
 
     loaded:

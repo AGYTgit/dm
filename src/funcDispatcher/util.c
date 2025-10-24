@@ -88,10 +88,27 @@ int cmdCommit(disArgs* data) {
 
 int cmdApply(disArgs* data) {
     logWarning("NYI: command: apply");
-    (void) data;
 
     dungeonConf conf = {0};
-    getDungeonConf(&conf, "/home/agyt/projects/dm/dm/conf/current.yaml");
+    if (getDungeonConf(&conf, "/home/agyt/projects/dm/dm/conf/current.yaml")) {
+        freeDungeonConf(&conf);
+        return 1;
+    }
+
+    logBlank("profile: %s\n", conf.profile);
+    logBlank("theme: %s\n", conf.theme);
+    logBlank("modules:\n");
+    for (size_t i = 0; i < conf.moduleCount; ++i) {
+        logBlank("    %s %d\n", conf.modules[i].name, conf.modules[i].state);
+        if (conf.modules[i].state == 1) {
+            char buffer[1024];
+            snprintf(buffer, sizeof(buffer), "%s/modules/%s/module.yaml", data->conf.paths.repo, conf.modules[i].name);
+            module mod = parseModule(buffer);
+            printModuleConf(mod);
+            freeModule(&mod);
+        }
+    }
+
     freeDungeonConf(&conf);
 
     return 0;
