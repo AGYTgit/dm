@@ -21,12 +21,12 @@ typedef struct {
 typedef struct {
     char* name;
     bool state;
-} dungeonModule ;
+} dungeonModuleForConf;
 
 typedef struct dungeonConf {
     char* profile;
     char* theme;
-    dungeonModule* modules;
+    dungeonModuleForConf* modules;
     size_t moduleCount;
 
     dungeonConfError error;

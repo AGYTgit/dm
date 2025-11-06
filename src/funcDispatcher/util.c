@@ -103,7 +103,7 @@ int cmdApply(disArgs* data) {
         if (conf.modules[i].state == 1) {
             char buffer[1024];
             snprintf(buffer, sizeof(buffer), "%s/modules/%s/module.yaml", data->conf.paths.repo, conf.modules[i].name);
-            module mod = parseModule(buffer);
+            dungeonModule mod = parseDungeonModule(buffer);
             printModuleConf(mod);
             freeModule(&mod);
         }
@@ -150,7 +150,7 @@ int cmdLoad(disArgs* data) {
     logWarning("NYI: command: load %s", data->cmd.value);
     char buffer[1024];
     snprintf(buffer, sizeof(buffer), "%s/modules/%s/module.yaml", data->conf.paths.repo, data->cmd.value);
-    module mod = parseModule(buffer);
+    dungeonModule mod = parseDungeonModule(buffer);
     printModuleConf(mod);
     return 0;
 }
@@ -159,7 +159,7 @@ int cmdUload(disArgs* data) {
     logWarning("NYI: command: uload %s", data->cmd.value);
     char buffer[1024];
     snprintf(buffer, sizeof(buffer), "/home/agyt/projects/dm/dm/templates/default/%s/module.yaml", data->cmd.value);
-    module mod = parseModule(buffer);
+    dungeonModule mod = parseDungeonModule(buffer);
     if (mod.error.type) {
         logError("[%d] %s", mod.error.type, mod.error.value ? mod.error.value : "");
         return -1;

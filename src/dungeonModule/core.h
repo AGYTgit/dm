@@ -1,7 +1,7 @@
-#ifndef STRUCT_MODULE_H
-#define STRUCT_MODULE_H
+#ifndef DUNGEON_MODULE_CORE_H
+#define DUNGEON_MODULE_CORE_H
 
-typedef struct module module;
+typedef struct dungeonModule dungeonModule;
 
 typedef enum {
     MODULE_ERROR_NONE,
@@ -45,7 +45,7 @@ typedef struct {
     countCharPtrPtrPair gitIgnore;
 } moduleConf;
 
-typedef struct module {
+typedef struct {
     char* name;
     char* version;
     char* path;
@@ -56,9 +56,11 @@ typedef struct module {
     moduleCommands commands;
 
     size_t subModCount;
-    module* subMods;
+    dungeonModule* subMods;
 
     moduleError error;
-} module;
+} dungeonModule;
 
-#endif // STRUCT_MODULE_H
+int freeDungeonModule(dungeonModule* mod);
+
+#endif // DUNGEON_MODULE_CORE_H

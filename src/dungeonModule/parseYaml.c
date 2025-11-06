@@ -7,7 +7,7 @@
 
 #include "parseYaml.h"
 
-static void setModuleError(module* mod, moduleErrorType type, const char* value) {
+static void setModuleError(dungeonModule* mod, moduleErrorType type, const char* value) {
     mod->error.type = type;
 
     free(mod->error.value);
@@ -72,8 +72,8 @@ static int addLink(moduleLinks* links, const char* source, const char* target) {
 }
 
 
-module parseModule(const char* filePath) {
-    module mod = {0};
+dungeonModule parseDungeonModule(const char* filePath) {
+    dungeonModule mod = {0};
 
     FILE* file = NULL;
     yaml_parser_t parser;
@@ -315,46 +315,7 @@ module parseModule(const char* filePath) {
     return mod;
 }
 
-void freeModule(module* mod) {
-    if (!mod) {
-        return;
-    }
-
-    free(mod->name);
-    free(mod->version);
-    free(mod->path);
-    free(mod->error.value);
-
-    for (size_t i = 0; i < mod->deps.module.count; ++i) {
-        free(mod->deps.module.value[i]);
-    }
-    free(mod->deps.module.value);
-
-    for (size_t i = 0; i < mod->deps.pacman.count; ++i) {
-        free(mod->deps.pacman.value[i]);
-    }
-    free(mod->deps.pacman.value);
-
-    for (size_t i = 0; i < mod->deps.yay.count; ++i) {
-        free(mod->deps.yay.value[i]);
-    }
-    free(mod->deps.yay.value);
-
-    for (size_t i = 0; i < mod->links.count; ++i) {
-        free(mod->links.source[i]);
-        free(mod->links.target[i]);
-    }
-    free(mod->links.source);
-    free(mod->links.target);
-
-    for (size_t i = 0; i < mod->subModCount; ++i) {
-        freeModule(&mod->subMods[i]);
-    }
-
-    free(mod->subMods);
-}
-
-int printModuleConf(module mod) {
+int printModuleConf(dungeonModule mod) {
     if (mod.error.type) {
         logBlank("ERROR [%d]: %s\n", mod.error.type, mod.error.value ? mod.error.value : "");
         return 1;

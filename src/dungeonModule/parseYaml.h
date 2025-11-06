@@ -1,12 +1,10 @@
-#ifndef PARSE_YAML_MODULE_H
-#define PARSE_YAML_MODULE_H
+#ifndef DUNGEON_MODULE_PARSEYAML_H
+#define DUNGEON_MODULE_PARSEYAML_H
 
 #include "core.h"
 
-module parseModule(const char* filePath);
+dungeonModule parseDungeonModule(const char* filePath);
 
-void freeModule(module* mod);
+int printDungeonModuleConf(dungeonModule mod);
 
-int printModuleConf(module mod);
-
-#endif // PARSE_YAML_MODULE_H
+#endif // DUNGEON_MODULE_PARSEYAML_H
